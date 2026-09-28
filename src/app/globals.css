@@ -1,45 +1,48 @@
 @import "tailwindcss";
 
 :root {
-  color-scheme: dark;
-  --background: #0f1218;
-  --foreground: #f3f5f8;
-  --card: #171a21;
-  --muted: #7d8595;
-  --border: #242833;
-  --primary: #34d399;
-  --on-primary: #08130e;
-  --accent-tint: #10231b;
+  color-scheme: light;
+  --background: #f8fafc;
+  --surface: #ffffff;
+  --card: #ffffff;
+  --foreground: #111827;
+  --muted: #6b7280;
+  --muted-2: #94a3b8;
+  --border: #e7eaef;
+  --border-2: #eceef2;
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --primary-tint: #eff6ff;
+  --on-primary: #ffffff;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-noto-thai);
+  --font-sans: var(--font-inter);
 }
 
-/* Dark premium — intentionally dark in every OS theme to match the approved
-   mockup (option B). No light/OS-preference switching. */
+/* Light professional admin theme. */
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-noto-thai), "Noto Sans Thai", sans-serif;
+  font-family: var(--font-inter), var(--font-noto-thai), "Noto Sans Thai", sans-serif;
 }
 
-/* Shared surface primitives, tuned for the dark theme. */
+/* Shared surface primitives. */
 .card {
-  background: var(--card);
+  background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 16px;
+  border-radius: 12px;
   padding: 16px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
 }
 
 .pill {
   border-radius: 999px;
   font-size: 12px;
   font-weight: 600;
-  padding: 4px 10px;
+  padding: 3px 10px;
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -49,75 +52,91 @@ body {
 .btn-primary {
   background: var(--primary);
   color: var(--on-primary);
-  border-radius: 14px;
-  min-height: 44px;
-  padding: 12px 16px;
+  border-radius: 8px;
+  min-height: 40px;
+  padding: 9px 16px;
   font-weight: 600;
-  box-shadow: 0 4px 14px rgba(52, 211, 153, 0.25);
+  font-size: 14px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  transition: filter 0.15s ease, opacity 0.15s ease;
+  transition: background 0.15s ease, opacity 0.15s ease;
 }
 .btn-primary:hover {
-  filter: brightness(1.06);
+  background: var(--primary-hover);
 }
 .btn-primary:disabled {
   opacity: 0.55;
-  filter: none;
+}
+
+.btn-ghost {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--foreground);
+  border-radius: 8px;
+  min-height: 40px;
+  padding: 9px 16px;
+  font-weight: 600;
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background 0.15s ease;
+}
+.btn-ghost:hover {
+  background: #f3f4f6;
 }
 
 .field {
   width: 100%;
-  background: var(--card);
+  background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 12px;
+  border-radius: 8px;
+  padding: 10px 12px;
   font-size: 14px;
-  min-height: 44px;
+  min-height: 40px;
   color: var(--foreground);
 }
 .field::placeholder {
-  color: var(--muted);
+  color: var(--muted-2);
 }
 .field:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.18);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
-/* Modal / bottom-sheet animations */
+/* Dialog animation (centered) */
 @keyframes modal-fade {
   from { opacity: 0; }
   to { opacity: 1; }
 }
-@keyframes sheet-up {
-  from { transform: translateY(100%); }
-  to { transform: translateY(0); }
-}
 @keyframes dialog-in {
-  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  from { opacity: 0; transform: translateY(8px) scale(0.985); }
   to { opacity: 1; transform: none; }
+}
+@keyframes drawer-in {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
 }
 .modal-backdrop {
   animation: modal-fade 0.15s ease-out;
 }
 .modal-panel {
-  animation: sheet-up 0.22s ease-out;
+  animation: dialog-in 0.16s ease-out;
 }
-@media (min-width: 640px) {
-  .modal-panel {
-    animation: dialog-in 0.18s ease-out;
-  }
+.drawer-panel {
+  animation: drawer-in 0.2s ease-out;
 }
 
-/* Data tables (dark) */
+/* Data tables (light) */
 .table-card {
-  background: var(--card);
+  background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 16px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
   overflow: hidden;
 }
 .tbl-scroll {
@@ -129,18 +148,19 @@ body {
   font-size: 13px;
 }
 .tbl thead th {
-  color: var(--muted);
-  font-weight: 500;
+  color: #8b93a1;
+  font-weight: 600;
   font-size: 11px;
   text-align: left;
-  padding: 9px 10px;
-  border-bottom: 1px solid var(--border);
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border-2);
   white-space: nowrap;
 }
 .tbl tbody td {
-  padding: 11px 10px;
-  border-top: 1px solid var(--border);
+  padding: 11px 12px;
+  border-top: 1px solid #f2f4f7;
   vertical-align: middle;
+  color: #1f2733;
 }
 .tbl tbody tr:first-child td {
   border-top: 0;
@@ -150,22 +170,21 @@ body {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
-/* Tappable rows */
 .tbl-tap tbody tr {
   cursor: pointer;
 }
 .tbl-tap tbody tr:hover td,
 .tbl-tap tbody tr:focus-within td {
-  background: #1c2029;
+  background: #f9fafb;
 }
-/* Sticky first column (for wide tables that scroll horizontally on phones) */
+/* Sticky first column (wide tables on small screens) */
 .tbl-sticky th:first-child,
 .tbl-sticky td:first-child {
   position: sticky;
   left: 0;
-  background: var(--card);
+  background: var(--surface);
 }
 .tbl-tap.tbl-sticky tbody tr:hover td:first-child,
 .tbl-tap.tbl-sticky tbody tr:focus-within td:first-child {
-  background: #1c2029;
+  background: #f9fafb;
 }
