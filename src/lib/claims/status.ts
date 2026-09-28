@@ -2,7 +2,7 @@ export const CLAIM_STATUSES = ['submitted', 'approved', 'returned', 'rejected', 
 export type ClaimStatus = (typeof CLAIM_STATUSES)[number];
 
 const LABELS: Record<ClaimStatus, string> = {
-  submitted: 'รออนุมัติ',
+  submitted: 'รอจ่าย',
   approved: 'อนุมัติแล้ว·รอจ่าย',
   returned: 'ตีกลับให้แก้',
   rejected: 'ปฏิเสธ',

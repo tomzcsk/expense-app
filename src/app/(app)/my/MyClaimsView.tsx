@@ -74,7 +74,7 @@ export function MyClaimsView({
         <div className="text-[11px] text-[#7d8595]">รวมเดือนนี้</div>
         <div className="text-[26px] font-extrabold text-[#34d399]">{baht(monthTotal)}</div>
         <div className="mt-1 flex gap-4 text-[11px]">
-          <span className="text-[#fbbf24]">● รออนุมัติ {pendingCount}</span>
+          <span className="text-[#fbbf24]">● รอจ่าย {pendingCount}</span>
           <span className="text-[#34d399]">● จ่ายแล้ว {paidCount}</span>
         </div>
       </div>

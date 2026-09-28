@@ -65,7 +65,7 @@ export function QueueList({ items }: { items: QueueItem[] }) {
       {items.length === 0 ? (
         <div className="card flex flex-col items-center gap-2 py-10 text-center">
           <div className="text-4xl">🎉</div>
-          <div className="text-sm text-[#7d8595]">ไม่มีรายการรออนุมัติ — เคลียร์หมดแล้ว</div>
+          <div className="text-sm text-[#7d8595]">ไม่มีรายการรอจ่าย — เคลียร์หมดแล้ว</div>
         </div>
       ) : (
         <div className="table-card">

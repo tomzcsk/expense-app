@@ -6,5 +6,5 @@ it('has the five statuses', () => {
 });
 it('gives a Thai label', () => {
   expect(statusLabelTh('paid')).toBe('จ่ายแล้ว');
-  expect(statusLabelTh('submitted')).toBe('รออนุมัติ');
+  expect(statusLabelTh('submitted')).toBe('รอจ่าย');
 });

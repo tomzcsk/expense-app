@@ -3,8 +3,8 @@ import type { ClaimStatus } from './status';
 export type Actor = 'submitter' | 'manager';
 
 const MANAGER: Record<ClaimStatus, ClaimStatus[]> = {
-  submitted: ['approved', 'returned', 'rejected'],
-  approved: ['paid', 'returned'],
+  submitted: ['paid', 'returned', 'rejected'], // pay directly — no approve step
+  approved: ['paid', 'returned'], // legacy only (claims approved before the flow change)
   returned: [],
   rejected: [],
   paid: [],

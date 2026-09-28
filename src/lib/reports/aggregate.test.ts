@@ -13,16 +13,11 @@ it('total excludes rejected', () => {
   expect(s.total).toBe(6000); // 3000 + 1000 + 2000
   expect(s.count).toBe(3);
 });
-it('splits paid vs approved-unpaid (with count)', () => {
+it('splits paid vs unpaid (submitted + approved awaiting payment)', () => {
   const s = summarize(rows);
   expect(s.paidTotal).toBe(3000);
-  expect(s.approvedUnpaidTotal).toBe(1000);
-  expect(s.approvedUnpaidCount).toBe(1);
-});
-it('tracks submitted (รอตรวจ) total + count', () => {
-  const s = summarize(rows);
-  expect(s.submittedTotal).toBe(2000);
-  expect(s.submittedCount).toBe(1);
+  expect(s.unpaidTotal).toBe(3000); // submitted 2000 + approved 1000
+  expect(s.unpaidCount).toBe(2);
 });
 it('tracks returned (ตีกลับ) total + count', () => {
   const s = summarize(rows);
@@ -33,7 +28,7 @@ it('groups by person with paid/unpaid split (excluding rejected), sorted by tota
   const s = summarize(rows);
   expect(s.byPerson).toEqual([
     { name: 'สมชาย', count: 2, total: 4000, paid: 3000, unpaid: 1000 },
-    { name: 'วีระ', count: 1, total: 2000, paid: 0, unpaid: 0 },
+    { name: 'วีระ', count: 1, total: 2000, paid: 0, unpaid: 2000 },
   ]);
 });
 it('groups by category (excluding rejected), sorted by total desc', () => {
@@ -52,6 +47,7 @@ it('counts returned toward total + person.total, but not paid/unpaid', () => {
   expect(s.returnedTotal).toBe(100);
   expect(s.returnedCount).toBe(1);
   expect(s.total).toBe(150); // returned + paid, both non-rejected
+  expect(s.unpaidTotal).toBe(0);
   expect(s.byPerson).toEqual([{ name: 'ก', count: 2, total: 150, paid: 50, unpaid: 0 }]);
 });
 it('empty input -> zeros', () => {
@@ -59,10 +55,8 @@ it('empty input -> zeros', () => {
     total: 0,
     count: 0,
     paidTotal: 0,
-    approvedUnpaidTotal: 0,
-    approvedUnpaidCount: 0,
-    submittedTotal: 0,
-    submittedCount: 0,
+    unpaidTotal: 0,
+    unpaidCount: 0,
     returnedTotal: 0,
     returnedCount: 0,
     byPerson: [],

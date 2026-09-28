@@ -19,10 +19,8 @@ export interface MonthlySummary {
   total: number;
   count: number;
   paidTotal: number;
-  approvedUnpaidTotal: number;
-  approvedUnpaidCount: number;
-  submittedTotal: number;
-  submittedCount: number;
+  unpaidTotal: number;
+  unpaidCount: number;
   returnedTotal: number;
   returnedCount: number;
   byPerson: PersonSummary[];
@@ -31,22 +29,22 @@ export interface MonthlySummary {
 
 // Money "in flight or done" — everything except rejected.
 const COUNTS = (s: ClaimStatus) => s !== 'rejected';
+// Awaiting payment: submitted (new flow, pay-on-submit) or approved (legacy).
+const UNPAID = (s: ClaimStatus) => s === 'submitted' || s === 'approved';
 
 export function summarize(rows: ClaimRow[]): MonthlySummary {
   const counted = rows.filter((r) => COUNTS(r.status));
 
-  const sumWhere = (st: ClaimStatus) =>
-    rows.filter((r) => r.status === st).reduce((n, r) => n + r.amountThb, 0);
-  const countWhere = (st: ClaimStatus) => rows.filter((r) => r.status === st).length;
+  const sumWhere = (pred: (s: ClaimStatus) => boolean) =>
+    rows.filter((r) => pred(r.status)).reduce((n, r) => n + r.amountThb, 0);
+  const countWhere = (pred: (s: ClaimStatus) => boolean) => rows.filter((r) => pred(r.status)).length;
 
   const total = counted.reduce((n, r) => n + r.amountThb, 0);
-  const paidTotal = sumWhere('paid');
-  const approvedUnpaidTotal = sumWhere('approved');
-  const approvedUnpaidCount = countWhere('approved');
-  const submittedTotal = sumWhere('submitted');
-  const submittedCount = countWhere('submitted');
-  const returnedTotal = sumWhere('returned');
-  const returnedCount = countWhere('returned');
+  const paidTotal = sumWhere((s) => s === 'paid');
+  const unpaidTotal = sumWhere(UNPAID);
+  const unpaidCount = countWhere(UNPAID);
+  const returnedTotal = sumWhere((s) => s === 'returned');
+  const returnedCount = countWhere((s) => s === 'returned');
 
   const person = new Map<string, PersonSummary>();
   const cat = new Map<string, { name: string; total: number }>();
@@ -55,7 +53,7 @@ export function summarize(rows: ClaimRow[]): MonthlySummary {
     p.count += 1;
     p.total += r.amountThb;
     if (r.status === 'paid') p.paid += r.amountThb;
-    if (r.status === 'approved') p.unpaid += r.amountThb;
+    if (UNPAID(r.status)) p.unpaid += r.amountThb;
     person.set(r.submitterName, p);
     const c = cat.get(r.categoryName) ?? { name: r.categoryName, total: 0 };
     c.total += r.amountThb;
@@ -67,10 +65,8 @@ export function summarize(rows: ClaimRow[]): MonthlySummary {
     total,
     count: counted.length,
     paidTotal,
-    approvedUnpaidTotal,
-    approvedUnpaidCount,
-    submittedTotal,
-    submittedCount,
+    unpaidTotal,
+    unpaidCount,
     returnedTotal,
     returnedCount,
     byPerson: [...person.values()].sort(byTotalDesc),

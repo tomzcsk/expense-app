@@ -35,7 +35,7 @@ export default async function QueuePage() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between gap-3">
-        <h1 className="text-lg font-bold">คิวรออนุมัติ</h1>
+        <h1 className="text-lg font-bold">คิวรอจ่าย</h1>
         <OnBehalfButton categories={categories ?? []} people={people ?? []} action={createClaimOnBehalf} />
       </div>
       <QueueList items={items} />

@@ -131,26 +131,21 @@ export function ReportView({
       >
         <div className="text-xs text-[#7d8595]">รอจ่าย · ต้องจ่ายให้พนักงาน</div>
         <div className="text-[30px] font-extrabold leading-tight text-[#34d399]">
-          {baht(summary.approvedUnpaidTotal)}
+          {baht(summary.unpaidTotal)}
         </div>
-        <div className="text-[11px] text-[#7d8595]">อนุมัติแล้ว {summary.approvedUnpaidCount} รายการ</div>
+        <div className="text-[11px] text-[#7d8595]">{summary.unpaidCount} รายการรอจ่าย</div>
       </div>
 
       {/* Supporting numbers */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-2 gap-3">
         <div className="card" style={{ borderColor: '#34506e' }}>
           <div className="text-[11px] text-[#9aa3b2]">ยอดเบิกรวม</div>
           <div className="text-lg font-bold text-[#f3f5f8]">{baht(summary.total)}</div>
-          <div className="text-[11px] text-[#7d8595]">{summary.count} รายการ · รวมรอตรวจ</div>
+          <div className="text-[11px] text-[#7d8595]">{summary.count} รายการ</div>
         </div>
         <div className="card">
           <div className="text-[11px] text-[#9aa3b2]">จ่ายแล้ว</div>
           <div className="text-lg font-bold text-[#34d399]">{baht(summary.paidTotal)}</div>
-        </div>
-        <div className="card">
-          <div className="text-[11px] text-[#9aa3b2]">รอตรวจ</div>
-          <div className="text-lg font-bold text-[#fbbf24]">{baht(summary.submittedTotal)}</div>
-          <div className="text-[11px] text-[#7d8595]">{summary.submittedCount} รายการ</div>
         </div>
       </div>
       {summary.returnedCount > 0 && (
