@@ -47,5 +47,5 @@ export async function GET(req: NextRequest) {
       return NextResponse.redirect(`${origin}/login?e=provision`);
     }
   }
-  return NextResponse.redirect(`${origin}/my`);
+  return NextResponse.redirect(`${origin}/dashboard`);
 }
