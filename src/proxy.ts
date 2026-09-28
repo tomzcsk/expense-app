@@ -3,7 +3,9 @@ import { NextResponse, type NextRequest } from 'next/server';
 
 const PUBLIC_PATHS = ['/login', '/auth/callback', '/auth/denied'];
 
-export async function middleware(req: NextRequest) {
+// Next 16 renamed the `middleware` convention to `proxy`. Same behavior:
+// refresh the Supabase session cookie and gate non-public routes.
+export async function proxy(req: NextRequest) {
   let res = NextResponse.next({ request: req });
 
   const supabase = createServerClient(
