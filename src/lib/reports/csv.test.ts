@@ -18,3 +18,7 @@ it('null/undefined -> empty string', () => {
   const csv = toCsv([{ claim_no: null as unknown as string, amount: undefined }], headers);
   expect(csv).toBe('"เลขที่","ยอด"\n"",""');
 });
+it('neutralizes formula-injection cells (= + - @) with a leading quote', () => {
+  const csv = toCsv([{ claim_no: '=1+1', amount: '@SUM(A1)' }], headers);
+  expect(csv).toBe('"เลขที่","ยอด"\n"\'=1+1","\'@SUM(A1)"');
+});
