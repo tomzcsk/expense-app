@@ -10,11 +10,20 @@ export default function LoginPage() {
     });
   };
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center gap-6">
-      <h1 className="text-2xl font-bold">ระบบเบิกจ่ายค่าใช้จ่าย</h1>
-      <button onClick={signIn} className="rounded-lg bg-blue-600 px-6 py-3 text-white">
-        เข้าสู่ระบบด้วย Google
-      </button>
+    <main
+      className="flex min-h-screen flex-col items-center justify-center p-6"
+      style={{ background: 'linear-gradient(160deg,#6366f1,#8b5cf6)' }}
+    >
+      <div className="card flex w-full max-w-[360px] flex-col items-center gap-5 py-9 text-center">
+        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#eef2ff] text-3xl">🧾</div>
+        <div>
+          <h1 className="text-xl font-bold">ระบบเบิกจ่ายค่าใช้จ่าย</h1>
+          <p className="mt-1 text-sm text-[#94a3b8]">เข้าสู่ระบบเพื่อส่งและติดตามการเบิก</p>
+        </div>
+        <button onClick={signIn} className="btn-primary w-full">
+          เข้าสู่ระบบด้วย Google
+        </button>
+      </div>
     </main>
   );
 }

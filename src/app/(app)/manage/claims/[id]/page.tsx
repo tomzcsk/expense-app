@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { requireManager } from '@/lib/current-user';
 import { StatusBadge } from '@/components/StatusBadge';
+import { categoryEmoji } from '@/lib/category-emoji';
 import { approveClaim, returnClaim, rejectClaim, payClaim } from '../../actions';
 import type { ClaimStatus } from '@/lib/claims/status';
 import { canTransition } from '@/lib/claims/state-machine';
@@ -13,7 +14,7 @@ export default async function ClaimDetail({ params }: { params: Promise<{ id: st
     .from('expense_claims')
     .select('*, submitter:submitter_id(name), enterer:created_by(name), category:category_id(name)')
     .eq('id', id).single();
-  if (!c) return <p>ไม่พบรายการ</p>;
+  if (!c) return <p className="card text-sm">ไม่พบรายการ</p>;
   const enteredByOther = c.created_by !== c.submitter_id;
 
   let receiptUrl: string | null = null;
@@ -22,42 +23,81 @@ export default async function ClaimDetail({ params }: { params: Promise<{ id: st
     receiptUrl = data?.signedUrl ?? null;
   }
   const status = c.status as ClaimStatus;
+  const categoryName = (c.category as { name: string } | null)?.name ?? null;
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex items-center gap-3">
-        <h1 className="text-xl font-bold">{c.claim_no}</h1><StatusBadge status={status} />
-      </div>
-      <div className="text-sm">
-        <div>คน: {(c.submitter as { name: string }).name}
-          {enteredByOther && <span className="text-gray-500"> · กรอกโดย {(c.enterer as { name: string }).name}</span>}
+    <div className="mx-auto flex w-full max-w-[520px] flex-col gap-4">
+      {/* Summary card */}
+      <div className="card flex flex-col gap-3">
+        <div className="flex items-center gap-3">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#eef2ff] text-xl">
+            {categoryEmoji(categoryName)}
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="text-sm font-bold">{c.claim_no}</div>
+            <div className="text-[11px] text-[#94a3b8]">{categoryName ?? 'ไม่ระบุหมวด'}</div>
+          </div>
+          <StatusBadge status={status} />
         </div>
-        <div>เดือน: {c.period} · หมวด: {(c.category as { name: string } | null)?.name ?? '-'}</div>
-        <div>ยอด: ฿{Number(c.amount_thb).toLocaleString()} · จ่ายเมื่อ {c.paid_date}</div>
-      </div>
-      {receiptUrl && <a href={receiptUrl} target="_blank" className="text-blue-600 underline">เปิดใบเสร็จ</a>}
 
-      {/* Button visibility derives from the shared state machine; the RPC re-enforces it. */}
-      <div className="flex flex-wrap gap-2">
+        <div className="grid grid-cols-2 gap-y-2 text-sm">
+          <div className="text-[#94a3b8]">คน</div>
+          <div className="text-right font-medium">
+            {(c.submitter as { name: string }).name}
+            {enteredByOther && (
+              <div className="text-[11px] font-normal text-[#94a3b8]">
+                กรอกโดย {(c.enterer as { name: string }).name}
+              </div>
+            )}
+          </div>
+          <div className="text-[#94a3b8]">เดือน</div>
+          <div className="text-right font-medium">{c.period}</div>
+          <div className="text-[#94a3b8]">ยอด</div>
+          <div className="text-right font-bold text-[#6366f1]">฿{Number(c.amount_thb).toLocaleString()}</div>
+          <div className="text-[#94a3b8]">จ่ายเมื่อ</div>
+          <div className="text-right font-medium">{c.paid_date}</div>
+        </div>
+
+        {receiptUrl && (
+          <a
+            href={receiptUrl}
+            target="_blank"
+            className="rounded-xl bg-[#eef2ff] py-2.5 text-center text-sm font-semibold text-[#6366f1]"
+          >
+            📎 เปิดใบเสร็จ
+          </a>
+        )}
+      </div>
+
+      {/* Actions — visibility derives from the shared state machine; the RPC re-enforces it. */}
+      <div className="flex flex-col gap-3">
         {canTransition(status, 'approved', 'manager') && (
-          <form action={approveClaim.bind(null, id)}><button className="rounded bg-green-600 px-4 py-2 text-white">อนุมัติ</button></form>
+          <form action={approveClaim.bind(null, id)}>
+            <button className="w-full rounded-xl px-4 py-3 font-semibold text-white" style={{ background: '#16a34a' }}>
+              ✓ อนุมัติ
+            </button>
+          </form>
         )}
         {canTransition(status, 'returned', 'manager') && (
-          <form action={async (fd: FormData) => { 'use server'; await returnClaim(id, String(fd.get('reason'))); }} className="flex gap-2">
-            <input name="reason" placeholder="เหตุผลตีกลับ" className="rounded border p-2" required />
-            <button className="rounded bg-orange-500 px-4 py-2 text-white">ตีกลับ</button>
+          <form action={async (fd: FormData) => { 'use server'; await returnClaim(id, String(fd.get('reason'))); }} className="card flex flex-col gap-2">
+            <input name="reason" placeholder="เหตุผลตีกลับ" className="field" required />
+            <button className="w-full rounded-xl px-4 py-3 font-semibold text-white" style={{ background: '#ea580c' }}>
+              ↩ ตีกลับให้แก้
+            </button>
           </form>
         )}
         {canTransition(status, 'rejected', 'manager') && (
-          <form action={async (fd: FormData) => { 'use server'; await rejectClaim(id, String(fd.get('reason'))); }} className="flex gap-2">
-            <input name="reason" placeholder="เหตุผลปฏิเสธ" className="rounded border p-2" required />
-            <button className="rounded bg-red-600 px-4 py-2 text-white">ปฏิเสธ</button>
+          <form action={async (fd: FormData) => { 'use server'; await rejectClaim(id, String(fd.get('reason'))); }} className="card flex flex-col gap-2">
+            <input name="reason" placeholder="เหตุผลปฏิเสธ" className="field" required />
+            <button className="w-full rounded-xl px-4 py-3 font-semibold text-white" style={{ background: '#dc2626' }}>
+              ✕ ปฏิเสธ
+            </button>
           </form>
         )}
         {canTransition(status, 'paid', 'manager') && (
-          <form action={async (fd: FormData) => { 'use server'; await payClaim(id, String(fd.get('ref'))); }} className="flex gap-2">
-            <input name="ref" placeholder="เลขอ้างอิงการโอน" className="rounded border p-2" required />
-            <button className="rounded bg-blue-600 px-4 py-2 text-white">ทำเครื่องหมายจ่ายแล้ว</button>
+          <form action={async (fd: FormData) => { 'use server'; await payClaim(id, String(fd.get('ref'))); }} className="card flex flex-col gap-2">
+            <input name="ref" placeholder="เลขอ้างอิงการโอน" className="field" required />
+            <button className="btn-primary w-full">💸 ทำเครื่องหมายจ่ายแล้ว</button>
           </form>
         )}
       </div>

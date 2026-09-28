@@ -23,17 +23,21 @@ export default async function ReportPage({ searchParams }: { searchParams: Promi
   const baht = (n: number) => `฿${n.toLocaleString()}`;
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold">รายงานเดือน {period}</h1>
-        <a href={`/manage/report/export?period=${period}`} className="rounded bg-blue-600 px-4 py-2 text-white">⬇ Export CSV</a>
+    <div className="flex flex-col gap-5">
+      <div className="flex items-center justify-between gap-3">
+        <h1 className="text-lg font-bold">รายงานเดือน {period}</h1>
+        <a href={`/manage/report/export?period=${period}`} className="btn-primary text-sm">
+          ⬇ Export CSV
+        </a>
       </div>
+
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Tile label="รวมทั้งเดือน" value={baht(s.total)} sub={`${s.count} รายการ`} />
-        <Tile label="จ่ายแล้ว" value={baht(s.paidTotal)} />
-        <Tile label="อนุมัติแล้ว·รอจ่าย" value={baht(s.approvedUnpaidTotal)} />
-        <Tile label="ยังไม่จบ" value={baht(s.total - s.paidTotal - s.approvedUnpaidTotal)} />
+        <Tile label="รวมทั้งเดือน" value={baht(s.total)} sub={`${s.count} รายการ`} accent="#6366f1" tint="#eef2ff" />
+        <Tile label="จ่ายแล้ว" value={baht(s.paidTotal)} accent="#16a34a" tint="#dcfce7" />
+        <Tile label="อนุมัติแล้ว·รอจ่าย" value={baht(s.approvedUnpaidTotal)} accent="#2563eb" tint="#dbeafe" />
+        <Tile label="ยังไม่จบ" value={baht(s.total - s.paidTotal - s.approvedUnpaidTotal)} accent="#d97706" tint="#fef3c7" />
       </div>
+
       <Section title="สรุปรายคน">
         {s.byPerson.map((p) => (
           <Row key={p.name} left={`${p.name} (${p.count})`} right={baht(p.total)} />
@@ -46,18 +50,28 @@ export default async function ReportPage({ searchParams }: { searchParams: Promi
   );
 }
 
-function Tile({ label, value, sub }: { label: string; value: string; sub?: string }) {
+function Tile({ label, value, sub, accent, tint }: { label: string; value: string; sub?: string; accent: string; tint: string }) {
   return (
-    <div className="rounded-lg border p-3">
-      <div className="text-xs text-gray-500">{label}</div>
-      <div className="text-lg font-bold">{value}</div>
-      {sub && <div className="text-xs text-gray-400">{sub}</div>}
+    <div className="card" style={{ background: tint }}>
+      <div className="text-xs text-[#64748b]">{label}</div>
+      <div className="text-lg font-bold" style={{ color: accent }}>{value}</div>
+      {sub && <div className="text-[11px] text-[#94a3b8]">{sub}</div>}
     </div>
   );
 }
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return <div className="rounded-lg border p-4"><h2 className="mb-2 font-semibold">{title}</h2>{children}</div>;
+  return (
+    <div className="card">
+      <h2 className="mb-2 text-sm font-semibold">{title}</h2>
+      {children}
+    </div>
+  );
 }
 function Row({ left, right }: { left: string; right: string }) {
-  return <div className="flex justify-between border-t py-1 text-sm"><span>{left}</span><span>{right}</span></div>;
+  return (
+    <div className="flex justify-between border-t border-[#eef0f5] py-2 text-sm first:border-t-0">
+      <span>{left}</span>
+      <span className="font-medium">{right}</span>
+    </div>
+  );
 }
