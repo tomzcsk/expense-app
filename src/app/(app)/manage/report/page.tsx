@@ -2,76 +2,91 @@ import { createClient } from '@/lib/supabase/server';
 import { requireManager } from '@/lib/current-user';
 import { summarize, type ClaimRow } from '@/lib/reports/aggregate';
 import type { ClaimStatus } from '@/lib/claims/status';
+import { ReportView, type PersonGroup } from './ReportView';
+
+// Add/subtract whole months on a "YYYY-MM" string.
+function addMonth(period: string, delta: number): string {
+  const [y, m] = period.split('-').map(Number);
+  const d = new Date(y, m - 1 + delta, 1);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+}
 
 export default async function ReportPage({ searchParams }: { searchParams: Promise<{ period?: string }> }) {
   await requireManager();
-  const { period = new Date().toISOString().slice(0, 7) } = await searchParams;
+  const thisMonth = new Date().toISOString().slice(0, 7);
+  const { period = thisMonth } = await searchParams;
   const supabase = await createClient();
 
-  const { data } = await supabase
-    .from('expense_claims')
-    .select('amount_thb, status, submitter:submitter_id(name), category:category_id(name)')
-    .eq('period', period);
+  // 6-month window ending at the selected month (oldest → selected) for the trend.
+  const trendPeriods = Array.from({ length: 6 }, (_, i) => addMonth(period, i - 5));
 
-  const rows: ClaimRow[] = (data ?? []).map((r) => ({
+  const [{ data }, { data: latestRow }, { data: trendRows }] = await Promise.all([
+    supabase
+      .from('expense_claims')
+      .select('id, claim_no, amount_thb, status, paid_date, submitter_id, submitter:submitter_id(name), category:category_id(name)')
+      .eq('period', period),
+    supabase.from('expense_claims').select('period').order('period', { ascending: false }).limit(1).maybeSingle(),
+    supabase.from('expense_claims').select('period, amount_thb').eq('status', 'paid').in('period', trendPeriods),
+  ]);
+
+  const claims = data ?? [];
+
+  const rows: ClaimRow[] = claims.map((r) => ({
     submitterName: (r.submitter as unknown as { name: string }).name,
     categoryName: (r.category as unknown as { name: string } | null)?.name ?? 'ไม่ระบุ',
     amountThb: Number(r.amount_thb),
     status: r.status as ClaimStatus,
   }));
-  const s = summarize(rows);
-  const baht = (n: number) => `฿${n.toLocaleString()}`;
+  const summary = summarize(rows);
+
+  // Per-person grouping (by submitter_id) for the drill-down modal.
+  const personMap = new Map<string, PersonGroup>();
+  for (const r of claims) {
+    const id = r.submitter_id as string;
+    const status = r.status as ClaimStatus;
+    const amount = Number(r.amount_thb);
+    const g =
+      personMap.get(id) ??
+      { id, name: (r.submitter as unknown as { name: string }).name, count: 0, total: 0, paid: 0, unpaid: 0, claims: [] };
+    g.claims.push({
+      id: r.id as string,
+      claimNo: r.claim_no as string,
+      categoryName: (r.category as unknown as { name: string } | null)?.name ?? null,
+      amount,
+      status,
+      paidDate: r.paid_date as string | null,
+    });
+    if (status !== 'rejected') {
+      g.count += 1;
+      g.total += amount;
+      if (status === 'paid') g.paid += amount;
+      if (status === 'approved') g.unpaid += amount;
+    }
+    personMap.set(id, g);
+  }
+  const people = [...personMap.values()].sort((a, b) => b.total - a.total);
+
+  const latestPeriod = latestRow?.period ?? thisMonth;
+  const nextPeriod = addMonth(period, 1);
+  const canGoNext = nextPeriod <= latestPeriod;
+
+  const paidByPeriod = new Map<string, number>();
+  for (const t of trendRows ?? []) {
+    const p = t.period as string;
+    paidByPeriod.set(p, (paidByPeriod.get(p) ?? 0) + Number(t.amount_thb));
+  }
+  const trend = trendPeriods.map((p) => ({ period: p, paid: paidByPeriod.get(p) ?? 0 }));
 
   return (
-    <div className="flex flex-col gap-5">
-      <div className="flex items-center justify-between gap-3">
-        <h1 className="text-lg font-bold">รายงานเดือน {period}</h1>
-        <a href={`/manage/report/export?period=${period}`} className="btn-primary text-sm">
-          ⬇ Export CSV
-        </a>
-      </div>
-
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Tile label="รวมทั้งเดือน" value={baht(s.total)} sub={`${s.count} รายการ`} accent="#34d399" tint="#10231b" />
-        <Tile label="จ่ายแล้ว" value={baht(s.paidTotal)} accent="#34d399" tint="#10231b" />
-        <Tile label="อนุมัติแล้ว·รอจ่าย" value={baht(s.approvedUnpaidTotal)} accent="#60a5fa" tint="#10233a" />
-        <Tile label="ยังไม่จบ" value={baht(s.total - s.paidTotal - s.approvedUnpaidTotal)} accent="#fbbf24" tint="#2a2410" />
-      </div>
-
-      <Section title="สรุปรายคน">
-        {s.byPerson.map((p) => (
-          <Row key={p.name} left={`${p.name} (${p.count})`} right={baht(p.total)} />
-        ))}
-      </Section>
-      <Section title="ตามหมวด">
-        {s.byCategory.map((c) => <Row key={c.name} left={c.name} right={baht(c.total)} />)}
-      </Section>
-    </div>
-  );
-}
-
-function Tile({ label, value, sub, accent, tint }: { label: string; value: string; sub?: string; accent: string; tint: string }) {
-  return (
-    <div className="card" style={{ background: tint }}>
-      <div className="text-xs text-[#9aa3b2]">{label}</div>
-      <div className="text-lg font-bold" style={{ color: accent }}>{value}</div>
-      {sub && <div className="text-[11px] text-[#7d8595]">{sub}</div>}
-    </div>
-  );
-}
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <div className="card">
-      <h2 className="mb-2 text-sm font-semibold">{title}</h2>
-      {children}
-    </div>
-  );
-}
-function Row({ left, right }: { left: string; right: string }) {
-  return (
-    <div className="flex justify-between border-t border-[#242833] py-2 text-sm first:border-t-0">
-      <span>{left}</span>
-      <span className="font-medium">{right}</span>
-    </div>
+    <ReportView
+      period={period}
+      prevPeriod={addMonth(period, -1)}
+      nextPeriod={nextPeriod}
+      canGoNext={canGoNext}
+      latestPeriod={latestPeriod}
+      summary={summary}
+      people={people}
+      trend={trend}
+    />
   );
 }
