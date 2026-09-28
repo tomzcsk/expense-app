@@ -3,19 +3,31 @@ import { useState } from 'react';
 import { createClient } from '@/lib/supabase/browser';
 import { categoryEmoji } from '@/lib/category-emoji';
 
+export type ClaimDefaults = {
+  period?: string;
+  category_id?: string | null;
+  amount_thb?: number | string;
+  paid_date?: string | null;
+  note?: string | null;
+};
+
 export function NewClaimForm({
   categories,
   action,
   people,
+  defaults,
+  inModal = false,
 }: {
   categories: { id: string; name: string }[];
   action: (formData: FormData) => void;
   people?: { id: string; name: string }[]; // present only for manager on-behalf entry
+  defaults?: ClaimDefaults; // present when editing/resubmitting — pre-fills the fields
+  inModal?: boolean; // drops the page chrome (title / sticky / bottom padding) inside a modal
 }) {
   const [receiptPath, setReceiptPath] = useState('');
   const [receiptName, setReceiptName] = useState('');
   const [uploading, setUploading] = useState(false);
-  const [categoryId, setCategoryId] = useState('');
+  const [categoryId, setCategoryId] = useState(defaults?.category_id ?? '');
 
   const upload = async (file: File) => {
     setUploading(true);
@@ -31,10 +43,14 @@ export function NewClaimForm({
   };
 
   const thisMonth = new Date().toISOString().slice(0, 7);
+  const editing = !!defaults;
 
   return (
-    <form action={action} className="mx-auto flex w-full max-w-[520px] flex-col gap-4 pb-28">
-      <h1 className="text-lg font-bold">ส่งเบิกค่าใช้จ่าย</h1>
+    <form
+      action={action}
+      className={inModal ? 'flex w-full flex-col gap-4' : 'mx-auto flex w-full max-w-[520px] flex-col gap-4 pb-28'}
+    >
+      {!inModal && <h1 className="text-lg font-bold">ส่งเบิกค่าใช้จ่าย</h1>}
 
       {people && (
         <div>
@@ -57,10 +73,10 @@ export function NewClaimForm({
         >
           <div className="text-3xl">{uploading ? '⏳' : receiptPath ? '✅' : '📷'}</div>
           <div className="text-sm font-semibold text-[#34d399]">
-            {uploading ? 'กำลังอัปโหลด...' : receiptPath ? 'อัปโหลดแล้ว · แตะเพื่อเปลี่ยน' : 'ถ่ายรูป / เลือกใบเสร็จ'}
+            {uploading ? 'กำลังอัปโหลด...' : receiptPath ? 'อัปโหลดแล้ว · แตะเพื่อเปลี่ยน' : 'ถ่าย / แนบใบเสร็จ'}
           </div>
           <div className="text-[11px] text-[#7d8595]">
-            {receiptName || 'รองรับรูป หรือ PDF'}
+            {receiptName || (editing ? 'ใบเสร็จเดิม — แนบใหม่ถ้าต้องการเปลี่ยน' : 'รองรับรูป หรือ PDF')}
           </div>
           <input
             type="file"
@@ -117,6 +133,7 @@ export function NewClaimForm({
             type="number"
             step="0.01"
             required
+            defaultValue={defaults?.amount_thb}
             placeholder="0.00"
             className="w-full bg-transparent text-2xl font-bold text-[#f3f5f8] outline-none placeholder:text-[#7d8595]"
           />
@@ -127,24 +144,24 @@ export function NewClaimForm({
       <div className="flex gap-3">
         <div className="flex-1">
           <div className="mb-1.5 text-xs font-semibold text-[#9aa1ab]">เดือน</div>
-          <input name="period" type="month" defaultValue={thisMonth} required className="field" />
+          <input name="period" type="month" defaultValue={defaults?.period ?? thisMonth} required className="field" />
         </div>
         <div className="flex-1">
           <div className="mb-1.5 text-xs font-semibold text-[#9aa1ab]">วันที่จ่าย</div>
-          <input name="paid_date" type="date" required className="field" />
+          <input name="paid_date" type="date" defaultValue={defaults?.paid_date ?? undefined} required className="field" />
         </div>
       </div>
 
       {/* Optional note */}
       <div>
         <div className="mb-1.5 text-xs font-semibold text-[#9aa1ab]">หมายเหตุ (ถ้ามี)</div>
-        <textarea name="note" rows={2} className="field" />
+        <textarea name="note" rows={2} defaultValue={defaults?.note ?? undefined} className="field" />
       </div>
 
-      {/* Sticky submit — sits above the fixed bottom nav */}
-      <div className="sticky bottom-20 mt-2">
+      {/* Submit — sticky above the bottom nav on the full page, plain inside a modal */}
+      <div className={inModal ? 'mt-1' : 'sticky bottom-20 mt-2'}>
         <button disabled={uploading} className="btn-primary w-full">
-          {uploading ? 'กำลังอัปโหลดใบเสร็จ...' : 'ส่งเบิก →'}
+          {uploading ? 'กำลังอัปโหลดใบเสร็จ...' : editing ? 'บันทึกและส่งใหม่ →' : 'ส่งเบิก →'}
         </button>
         <div className="mt-2 text-center text-[11px] text-[#7d8595]">
           VAT/ก่อน VAT บัญชีจะตรวจให้ ไม่ต้องคิดเอง

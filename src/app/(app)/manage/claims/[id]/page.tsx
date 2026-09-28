@@ -3,8 +3,8 @@ import { requireManager } from '@/lib/current-user';
 import { StatusBadge } from '@/components/StatusBadge';
 import { categoryEmoji } from '@/lib/category-emoji';
 import { approveClaim, returnClaim, rejectClaim, payClaim } from '../../actions';
+import { ClaimActions } from './ClaimActions';
 import type { ClaimStatus } from '@/lib/claims/status';
-import { canTransition } from '@/lib/claims/state-machine';
 
 export default async function ClaimDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -24,6 +24,13 @@ export default async function ClaimDetail({ params }: { params: Promise<{ id: st
   }
   const status = c.status as ClaimStatus;
   const categoryName = (c.category as { name: string } | null)?.name ?? null;
+
+  // Same server actions + field names as before, defined here (Server Component)
+  // and passed to the client confirm-modals. The RPC re-enforces authorization.
+  const approveAction = approveClaim.bind(null, id);
+  const returnAction = async (fd: FormData) => { 'use server'; await returnClaim(id, String(fd.get('reason'))); };
+  const rejectAction = async (fd: FormData) => { 'use server'; await rejectClaim(id, String(fd.get('reason'))); };
+  const payAction = async (fd: FormData) => { 'use server'; await payClaim(id, String(fd.get('ref'))); };
 
   return (
     <div className="mx-auto flex w-full max-w-[520px] flex-col gap-4">
@@ -70,37 +77,13 @@ export default async function ClaimDetail({ params }: { params: Promise<{ id: st
       </div>
 
       {/* Actions — visibility derives from the shared state machine; the RPC re-enforces it. */}
-      <div className="flex flex-col gap-3">
-        {canTransition(status, 'approved', 'manager') && (
-          <form action={approveClaim.bind(null, id)}>
-            <button className="w-full rounded-xl px-4 py-3 font-semibold" style={{ background: '#34d399', color: '#08130e' }}>
-              ✓ อนุมัติ
-            </button>
-          </form>
-        )}
-        {canTransition(status, 'returned', 'manager') && (
-          <form action={async (fd: FormData) => { 'use server'; await returnClaim(id, String(fd.get('reason'))); }} className="card flex flex-col gap-2">
-            <input name="reason" placeholder="เหตุผลตีกลับ" className="field" required />
-            <button className="w-full rounded-xl px-4 py-3 font-semibold text-white" style={{ background: '#ea580c' }}>
-              ↩ ตีกลับให้แก้
-            </button>
-          </form>
-        )}
-        {canTransition(status, 'rejected', 'manager') && (
-          <form action={async (fd: FormData) => { 'use server'; await rejectClaim(id, String(fd.get('reason'))); }} className="card flex flex-col gap-2">
-            <input name="reason" placeholder="เหตุผลปฏิเสธ" className="field" required />
-            <button className="w-full rounded-xl px-4 py-3 font-semibold text-white" style={{ background: '#dc2626' }}>
-              ✕ ปฏิเสธ
-            </button>
-          </form>
-        )}
-        {canTransition(status, 'paid', 'manager') && (
-          <form action={async (fd: FormData) => { 'use server'; await payClaim(id, String(fd.get('ref'))); }} className="card flex flex-col gap-2">
-            <input name="ref" placeholder="เลขอ้างอิงการโอน" className="field" required />
-            <button className="btn-primary w-full">💸 ทำเครื่องหมายจ่ายแล้ว</button>
-          </form>
-        )}
-      </div>
+      <ClaimActions
+        status={status}
+        approveAction={approveAction}
+        returnAction={returnAction}
+        rejectAction={rejectAction}
+        payAction={payAction}
+      />
     </div>
   );
 }

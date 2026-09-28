@@ -2,6 +2,8 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { requireManager } from '@/lib/current-user';
 import { StatusBadge } from '@/components/StatusBadge';
+import { OnBehalfButton } from './OnBehalfButton';
+import { createClaimOnBehalf } from '../actions';
 import type { ClaimStatus } from '@/lib/claims/status';
 
 const baht = (n: number) => `฿${Number(n).toLocaleString()}`;
@@ -9,17 +11,24 @@ const baht = (n: number) => `฿${Number(n).toLocaleString()}`;
 export default async function QueuePage() {
   await requireManager();
   const supabase = await createClient();
-  const { data: claims } = await supabase
-    .from('expense_claims')
-    .select('id, claim_no, period, amount_thb, status, submitter:submitter_id(name)')
-    .in('status', ['submitted', 'approved'])
-    .order('created_at', { ascending: true });
+  const [{ data: claims }, { data: categories }, { data: people }] = await Promise.all([
+    supabase
+      .from('expense_claims')
+      .select('id, claim_no, period, amount_thb, status, submitter:submitter_id(name)')
+      .in('status', ['submitted', 'approved'])
+      .order('created_at', { ascending: true }),
+    supabase.from('categories').select('id, name').eq('active', true).order('name'),
+    supabase.from('people').select('id, name').eq('active', true).order('name'),
+  ]);
 
   const rows = claims ?? [];
 
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="text-lg font-bold">คิวรออนุมัติ</h1>
+      <div className="flex items-center justify-between gap-3">
+        <h1 className="text-lg font-bold">คิวรออนุมัติ</h1>
+        <OnBehalfButton categories={categories ?? []} people={people ?? []} action={createClaimOnBehalf} />
+      </div>
 
       {rows.length === 0 ? (
         <div className="card flex flex-col items-center gap-2 py-10 text-center">

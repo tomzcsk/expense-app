@@ -7,7 +7,9 @@ export default async function EditClaimPage({ params }: { params: Promise<{ id: 
   const { id } = await params;
   const supabase = await createClient();
   const { data: claim } = await supabase
-    .from('expense_claims').select('id, status, return_reason').eq('id', id).single();
+    .from('expense_claims')
+    .select('id, status, return_reason, period, amount_thb, paid_date, note, category_id')
+    .eq('id', id).single();
   // Only a returned claim is editable (RLS already limits visibility to the owner).
   if (!claim || claim.status !== 'returned') redirect('/my');
 
@@ -19,7 +21,17 @@ export default async function EditClaimPage({ params }: { params: Promise<{ id: 
       <div className="mx-auto w-full max-w-[520px] rounded-2xl border border-[#3a2a1a] px-4 py-3 text-sm" style={{ background: '#2e1c10', color: '#fb923c' }}>
         ↩ ตีกลับให้แก้: {claim.return_reason}
       </div>
-      <NewClaimForm categories={categories ?? []} action={resubmitClaim.bind(null, id)} />
+      <NewClaimForm
+        categories={categories ?? []}
+        action={resubmitClaim.bind(null, id)}
+        defaults={{
+          period: claim.period,
+          category_id: claim.category_id,
+          amount_thb: claim.amount_thb,
+          paid_date: claim.paid_date,
+          note: claim.note,
+        }}
+      />
     </div>
   );
 }
