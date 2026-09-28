@@ -51,9 +51,10 @@ export function QueueList({ items }: { items: QueueItem[] }) {
     };
   }, [selected]);
 
-  // Tapping a row opens the modal (with JS); plain navigation to the full page
-  // remains the fallback for no-JS / new-tab / direct links.
-  const openModal = (item: QueueItem) => (e: React.MouseEvent) => {
+  // Tapping a row opens the modal (with JS); the real <Link> in the เลขที่ cell
+  // is the fallback for no-JS / new-tab / direct links. On a plain click the row
+  // handler cancels that navigation and opens the modal instead.
+  const openRow = (item: QueueItem) => (e: React.MouseEvent) => {
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
     e.preventDefault();
     setSelected(item);
@@ -67,30 +68,42 @@ export function QueueList({ items }: { items: QueueItem[] }) {
           <div className="text-sm text-[#7d8595]">ไม่มีรายการรออนุมัติ — เคลียร์หมดแล้ว</div>
         </div>
       ) : (
-        <div className="flex flex-col gap-2.5">
-          {items.map((c) => (
-            <Link
-              key={c.id}
-              href={`/manage/claims/${c.id}`}
-              onClick={openModal(c)}
-              className="card flex items-center gap-3"
-            >
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#1b2b26] text-lg">
-                {categoryEmoji(c.categoryName)}
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="truncate text-sm font-semibold">{c.submitterName}</div>
-                <div className="text-[11px] text-[#7d8595]">
-                  {c.claimNo} · {c.period}
-                </div>
-              </div>
-              <div className="flex flex-col items-end gap-1">
-                <div className="text-sm font-bold">{baht(c.amount)}</div>
-                <StatusBadge status={c.status} />
-              </div>
-              <div className="text-[#34d399]">›</div>
-            </Link>
-          ))}
+        <div className="table-card">
+          <div className="tbl-scroll">
+            <table className="tbl tbl-tap tbl-sticky">
+              <thead>
+                <tr>
+                  <th scope="col">เลขที่</th>
+                  <th scope="col">คน</th>
+                  <th scope="col">บริการ</th>
+                  <th scope="col" className="num">ยอด</th>
+                  <th scope="col">วันที่จ่าย</th>
+                  <th scope="col">สถานะ</th>
+                </tr>
+              </thead>
+              <tbody>
+                {items.map((c) => (
+                  <tr key={c.id} onClick={openRow(c)}>
+                    <td className="whitespace-nowrap">
+                      <Link href={`/manage/claims/${c.id}`} className="font-medium text-[#f3f5f8]">
+                        {c.claimNo}
+                      </Link>
+                    </td>
+                    <td className="whitespace-nowrap font-medium">{c.submitterName}</td>
+                    <td className="whitespace-nowrap">
+                      <span className="mr-1.5">{categoryEmoji(c.categoryName)}</span>
+                      {c.categoryName ?? '-'}
+                    </td>
+                    <td className="num font-bold">{baht(c.amount)}</td>
+                    <td className="whitespace-nowrap text-[#7d8595]">{c.paidDate ?? '-'}</td>
+                    <td>
+                      <StatusBadge status={c.status} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 

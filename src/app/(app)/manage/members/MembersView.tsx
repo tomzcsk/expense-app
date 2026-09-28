@@ -82,85 +82,96 @@ export function MembersView({ members, meId }: { members: Member[]; meId: string
         />
       )}
 
-      <div className="flex flex-col gap-2.5">
-        {visible.map((m) => {
-          const isSelf = m.id === meId;
-          return (
-            <div key={m.id} className="card flex flex-col gap-3">
-              <div className="flex items-start gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#10231b] text-lg">
-                  🙂
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="truncate text-sm font-semibold">{m.name}</span>
-                    {isSelf && (
-                      <span className="pill" style={{ background: '#10231b', color: '#34d399' }}>
-                        คุณ
-                      </span>
-                    )}
-                  </div>
-                  <div className="truncate text-[12px] text-[#7d8595]">{m.email}</div>
-                  <div className="mt-1.5 flex flex-wrap items-center gap-2 text-[10px]">
-                    <span
-                      className="rounded-full border px-2 py-0.5 font-semibold"
-                      style={
-                        m.role === 'manager'
-                          ? { borderColor: '#1f3b30', background: '#10231b', color: '#34d399' }
-                          : { borderColor: '#242833', color: '#9aa3b2' }
-                      }
-                    >
-                      {roleLabel(m.role)}
-                    </span>
-                    <span style={{ color: m.active ? '#34d399' : '#7d8595' }}>
-                      {m.active ? '● ใช้งาน' : '○ ปิดใช้งาน'}
-                    </span>
-                    {/* Telegram link status — placeholder (no column in schema yet, Phase 2) */}
-                    <span className="text-[#7d8595]">📱 ยังไม่เชื่อม</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex overflow-hidden rounded-lg border border-[#242833] text-[11px]">
-                  {(['submitter', 'manager'] as Role[]).map((r) => {
-                    const current = m.role === r;
-                    return (
-                      <button
-                        key={r}
-                        type="button"
-                        disabled={isSelf || busy || current}
-                        onClick={() => requestRole(m, r)}
-                        className="px-2.5 py-1.5 disabled:cursor-not-allowed"
+      <div className="table-card">
+        <div className="tbl-scroll">
+          <table className="tbl tbl-sticky">
+            <thead>
+              <tr>
+                <th scope="col">ชื่อ</th>
+                <th scope="col">อีเมล</th>
+                <th scope="col">role</th>
+                <th scope="col">สถานะ</th>
+                <th scope="col">Telegram</th>
+                <th scope="col">จัดการ</th>
+              </tr>
+            </thead>
+            <tbody>
+              {visible.map((m) => {
+                const isSelf = m.id === meId;
+                return (
+                  <tr key={m.id}>
+                    <td className="whitespace-nowrap">
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold">{m.name}</span>
+                        {isSelf && (
+                          <span className="pill" style={{ background: '#10231b', color: '#34d399' }}>
+                            คุณ
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="whitespace-nowrap text-[#7d8595]">{m.email}</td>
+                    <td className="whitespace-nowrap">
+                      <span
+                        className="rounded-full border px-2 py-0.5 text-[10px] font-semibold"
                         style={
-                          current
-                            ? { background: '#34d399', color: '#08130e', fontWeight: 600 }
-                            : { color: isSelf ? '#3a4150' : '#9aa3b2' }
+                          m.role === 'manager'
+                            ? { borderColor: '#1f3b30', background: '#10231b', color: '#34d399' }
+                            : { borderColor: '#242833', color: '#9aa3b2' }
                         }
                       >
-                        {roleLabel(r)}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                <button
-                  type="button"
-                  disabled={isSelf || busy}
-                  onClick={() => toggleActive(m)}
-                  className="rounded-lg border px-3 py-1.5 text-[11px] font-semibold disabled:cursor-not-allowed disabled:opacity-50"
-                  style={
-                    m.active
-                      ? { borderColor: '#3a2415', background: '#1c130c', color: '#fb923c' }
-                      : { borderColor: '#1f3b30', background: '#10231b', color: '#34d399' }
-                  }
-                >
-                  {m.active ? 'ปิดการใช้งาน' : 'เปิดการใช้งาน'}
-                </button>
-              </div>
-            </div>
-          );
-        })}
+                        {roleLabel(m.role)}
+                      </span>
+                    </td>
+                    <td className="whitespace-nowrap text-[11px]" style={{ color: m.active ? '#34d399' : '#7d8595' }}>
+                      {m.active ? '● ใช้งาน' : '○ ปิดใช้งาน'}
+                    </td>
+                    {/* Telegram link status — placeholder (no column in schema yet, Phase 2) */}
+                    <td className="whitespace-nowrap text-[11px] text-[#7d8595]">📱 ยังไม่เชื่อม</td>
+                    <td className="whitespace-nowrap">
+                      <div className="flex items-center gap-2">
+                        <div className="flex overflow-hidden rounded-lg border border-[#242833] text-[11px]">
+                          {(['submitter', 'manager'] as Role[]).map((r) => {
+                            const current = m.role === r;
+                            return (
+                              <button
+                                key={r}
+                                type="button"
+                                disabled={isSelf || busy || current}
+                                onClick={() => requestRole(m, r)}
+                                className="px-2.5 py-1.5 disabled:cursor-not-allowed"
+                                style={
+                                  current
+                                    ? { background: '#34d399', color: '#08130e', fontWeight: 600 }
+                                    : { color: isSelf ? '#3a4150' : '#9aa3b2' }
+                                }
+                              >
+                                {roleLabel(r)}
+                              </button>
+                            );
+                          })}
+                        </div>
+                        <button
+                          type="button"
+                          disabled={isSelf || busy}
+                          onClick={() => toggleActive(m)}
+                          className="rounded-lg border px-3 py-1.5 text-[11px] font-semibold disabled:cursor-not-allowed disabled:opacity-50"
+                          style={
+                            m.active
+                              ? { borderColor: '#3a2415', background: '#1c130c', color: '#fb923c' }
+                              : { borderColor: '#1f3b30', background: '#10231b', color: '#34d399' }
+                          }
+                        >
+                          {m.active ? 'ปิดการใช้งาน' : 'เปิดการใช้งาน'}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* Confirm (role change / deactivate) */}

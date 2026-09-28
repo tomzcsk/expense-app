@@ -190,39 +190,68 @@ export function ReportView({
             {people.length === 0 ? 'ยังไม่มีรายการในเดือนนี้' : 'ไม่พบชื่อที่ค้นหา'}
           </div>
         ) : (
-          <div className="flex flex-col gap-2">
-            {visiblePeople.map((p) => (
-              <button
-                key={p.id}
-                type="button"
-                onClick={() => setSelected(p)}
-                className="card flex w-full flex-col gap-2 text-left"
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0">
-                    <div className="truncate text-sm font-semibold">{p.name}</div>
-                    <div className="text-[11px] text-[#7d8595]">{p.count} รายการ</div>
-                  </div>
-                  <div className="flex flex-col items-end gap-1">
-                    <div className="text-sm font-bold text-[#34d399]">฿{p.total.toLocaleString()}</div>
-                    {p.unpaid > 0 && (
-                      <span className="pill" style={{ background: '#2a2410', color: '#fbbf24' }}>
-                        ค้างจ่าย ฿{p.unpaid.toLocaleString()}
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#242833]">
-                  <div
-                    className="h-full rounded-full"
-                    style={{ width: `${(p.total / maxTotal) * 100}%`, background: '#34d399' }}
-                  />
-                </div>
-              </button>
-            ))}
+          <div className="table-card">
+            <table className="tbl tbl-tap">
+              <thead>
+                <tr>
+                  <th scope="col">ชื่อ</th>
+                  <th scope="col" className="num">จำนวน</th>
+                  <th scope="col" className="num">ยอดรวม</th>
+                  <th scope="col" className="num">ค้างจ่าย</th>
+                </tr>
+              </thead>
+              <tbody>
+                {visiblePeople.map((p) => {
+                  const pct = (p.total / maxTotal) * 100;
+                  return (
+                    <tr key={p.id} onClick={() => setSelected(p)}>
+                      <td className="font-semibold">{p.name}</td>
+                      <td className="num text-[#7d8595]">{p.count}</td>
+                      <td
+                        className="num font-bold text-[#34d399]"
+                        style={{ background: `linear-gradient(to right, rgba(52,211,153,0.10) ${pct}%, transparent ${pct}%)` }}
+                      >
+                        ฿{p.total.toLocaleString()}
+                      </td>
+                      <td className="num" style={{ color: p.unpaid > 0 ? '#fbbf24' : '#7d8595' }}>
+                        {p.unpaid > 0 ? `฿${p.unpaid.toLocaleString()}` : '—'}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         )}
       </div>
+
+      {/* By category */}
+      {summary.byCategory.length > 0 && (
+        <div className="flex flex-col gap-3">
+          <h2 className="text-sm font-semibold">ตามหมวด</h2>
+          <div className="table-card">
+            <table className="tbl">
+              <thead>
+                <tr>
+                  <th scope="col">หมวด</th>
+                  <th scope="col" className="num">ยอดรวม</th>
+                </tr>
+              </thead>
+              <tbody>
+                {summary.byCategory.map((c) => (
+                  <tr key={c.name}>
+                    <td>
+                      <span className="mr-1.5">{categoryEmoji(c.name)}</span>
+                      {c.name}
+                    </td>
+                    <td className="num font-medium">{baht(c.total)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       {/* Trend (secondary) */}
       {trend.some((t) => t.paid > 0) && (

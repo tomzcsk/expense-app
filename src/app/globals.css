@@ -111,3 +111,61 @@ body {
     animation: dialog-in 0.18s ease-out;
   }
 }
+
+/* Data tables (dark) */
+.table-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+}
+.tbl-scroll {
+  overflow-x: auto;
+}
+.tbl {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.tbl thead th {
+  color: var(--muted);
+  font-weight: 500;
+  font-size: 11px;
+  text-align: left;
+  padding: 9px 10px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.tbl tbody td {
+  padding: 11px 10px;
+  border-top: 1px solid var(--border);
+  vertical-align: middle;
+}
+.tbl tbody tr:first-child td {
+  border-top: 0;
+}
+.tbl th.num,
+.tbl td.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+/* Tappable rows */
+.tbl-tap tbody tr {
+  cursor: pointer;
+}
+.tbl-tap tbody tr:hover td,
+.tbl-tap tbody tr:focus-within td {
+  background: #1c2029;
+}
+/* Sticky first column (for wide tables that scroll horizontally on phones) */
+.tbl-sticky th:first-child,
+.tbl-sticky td:first-child {
+  position: sticky;
+  left: 0;
+  background: var(--card);
+}
+.tbl-tap.tbl-sticky tbody tr:hover td:first-child,
+.tbl-tap.tbl-sticky tbody tr:focus-within td:first-child {
+  background: #1c2029;
+}

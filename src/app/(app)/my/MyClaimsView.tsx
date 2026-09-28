@@ -116,26 +116,38 @@ export function MyClaimsView({
           </button>
         </div>
       ) : (
-        <div className="flex flex-col gap-2.5">
+        <div className="flex flex-col gap-2">
           <h2 className="text-[11px] font-semibold text-[#7d8595]">รายการเดือนนี้</h2>
           {normal.length === 0 ? (
             <div className="text-[12px] text-[#7d8595]">— ไม่มีรายการอื่น —</div>
           ) : (
-            normal.map((i) => (
-              <div key={i.id} className="card flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#1b2b26] text-lg">
-                  {categoryEmoji(i.categoryName)}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="truncate text-sm font-semibold">{i.categoryName ?? i.claimNo}</div>
-                  <div className="text-[11px] text-[#7d8595]">{shortThaiDate(i.paidDate)}</div>
-                </div>
-                <div className="flex flex-col items-end gap-1">
-                  <div className="text-sm font-bold">{baht(i.amount)}</div>
-                  <StatusBadge status={i.status} />
-                </div>
-              </div>
-            ))
+            <div className="table-card">
+              <table className="tbl">
+                <thead>
+                  <tr>
+                    <th scope="col">บริการ</th>
+                    <th scope="col" className="num">ยอด</th>
+                    <th scope="col">วันที่</th>
+                    <th scope="col">สถานะ</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {normal.map((i) => (
+                    <tr key={i.id}>
+                      <td>
+                        <span className="mr-1.5">{categoryEmoji(i.categoryName)}</span>
+                        <span className="font-semibold">{i.categoryName ?? i.claimNo}</span>
+                      </td>
+                      <td className="num font-bold">{baht(i.amount)}</td>
+                      <td className="whitespace-nowrap text-[#7d8595]">{shortThaiDate(i.paidDate)}</td>
+                      <td>
+                        <StatusBadge status={i.status} />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
       )}
