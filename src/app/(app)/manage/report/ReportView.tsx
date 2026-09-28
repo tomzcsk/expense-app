@@ -91,14 +91,14 @@ export function ReportView({
           <Link
             href={`/manage/report?period=${prevPeriod}`}
             aria-label="เดือนก่อนหน้า"
-            className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#242833] bg-[#171a21] text-lg text-[#f3f5f8]"
+            className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#e7eaef] bg-white text-lg text-[#111827]"
           >
             ‹
           </Link>
           <button
             type="button"
             onClick={() => setPickerOpen(true)}
-            className="min-w-[150px] rounded-lg px-3 py-1.5 text-center text-base font-bold"
+            className="min-w-[150px] rounded-lg px-3 py-1.5 text-center text-base font-bold text-[#111827]"
           >
             {monthLabel(period)} ▾
           </button>
@@ -106,14 +106,14 @@ export function ReportView({
             <Link
               href={`/manage/report?period=${nextPeriod}`}
               aria-label="เดือนถัดไป"
-              className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#242833] bg-[#171a21] text-lg text-[#f3f5f8]"
+              className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#e7eaef] bg-white text-lg text-[#111827]"
             >
               ›
             </Link>
           ) : (
             <span
               aria-disabled
-              className="flex h-9 w-9 cursor-not-allowed items-center justify-center rounded-lg border border-[#242833] bg-[#171a21] text-lg text-[#3a4150]"
+              className="flex h-9 w-9 cursor-not-allowed items-center justify-center rounded-lg border border-[#e7eaef] bg-white text-lg text-[#cbd5e1]"
             >
               ›
             </span>
@@ -125,45 +125,42 @@ export function ReportView({
       </div>
 
       {/* STRONGEST: money still to pay out */}
-      <div
-        className="rounded-2xl border p-4"
-        style={{ background: 'linear-gradient(135deg,#10231b,#0f1a16)', borderColor: '#1f3b30' }}
-      >
-        <div className="text-xs text-[#7d8595]">รอจ่าย · ต้องจ่ายให้พนักงาน</div>
-        <div className="text-[30px] font-extrabold leading-tight text-[#34d399]">
+      <div className="rounded-xl bg-white p-4" style={{ border: '2px solid #f59e0b' }}>
+        <div className="text-xs font-semibold text-[#b45309]">⏳ รอจ่าย · ต้องจ่ายให้พนักงาน</div>
+        <div className="text-[30px] font-extrabold leading-tight text-[#b45309]">
           {baht(summary.unpaidTotal)}
         </div>
-        <div className="text-[11px] text-[#7d8595]">{summary.unpaidCount} รายการรอจ่าย</div>
+        <div className="text-[11px] text-[#d97706]">{summary.unpaidCount} รายการรอจ่าย</div>
       </div>
 
       {/* Supporting numbers */}
       <div className="grid grid-cols-2 gap-3">
-        <div className="card" style={{ borderColor: '#34506e' }}>
-          <div className="text-[11px] text-[#9aa3b2]">ยอดเบิกรวม</div>
-          <div className="text-lg font-bold text-[#f3f5f8]">{baht(summary.total)}</div>
-          <div className="text-[11px] text-[#7d8595]">{summary.count} รายการ</div>
+        <div className="card">
+          <div className="text-[11px] text-[#6b7280]">ยอดเบิกรวม</div>
+          <div className="text-lg font-bold text-[#111827]">{baht(summary.total)}</div>
+          <div className="text-[11px] text-[#94a3b8]">{summary.count} รายการ</div>
         </div>
         <div className="card">
-          <div className="text-[11px] text-[#9aa3b2]">จ่ายแล้ว</div>
-          <div className="text-lg font-bold text-[#34d399]">{baht(summary.paidTotal)}</div>
+          <div className="text-[11px] text-[#6b7280]">จ่ายแล้ว</div>
+          <div className="text-lg font-bold text-[#16a34a]">{baht(summary.paidTotal)}</div>
         </div>
       </div>
       {summary.returnedCount > 0 && (
-        <div className="-mt-2 text-[11px] text-[#fb923c]">↩ ตีกลับ {summary.returnedCount} รายการ</div>
+        <div className="-mt-2 text-[11px] text-[#ea580c]">↩ ตีกลับ {summary.returnedCount} รายการ</div>
       )}
 
       {/* Per-person */}
       <div className="flex flex-col gap-3">
         <div className="flex items-center justify-between gap-2">
-          <h2 className="text-sm font-semibold">รายคน ({people.length})</h2>
-          <div className="flex overflow-hidden rounded-lg border border-[#242833] text-[11px]">
+          <h2 className="text-sm font-semibold text-[#111827]">รายคน ({people.length})</h2>
+          <div className="flex overflow-hidden rounded-lg border border-[#e7eaef] text-[11px]">
             {(['total', 'unpaid', 'name'] as SortKey[]).map((k) => (
               <button
                 key={k}
                 type="button"
                 onClick={() => setSort(k)}
                 className="px-2.5 py-1.5"
-                style={sort === k ? { background: '#34d399', color: '#08130e', fontWeight: 600 } : { color: '#9aa3b2' }}
+                style={sort === k ? { background: '#2563eb', color: '#fff', fontWeight: 600 } : { color: '#6b7280' }}
               >
                 {k === 'total' ? 'ยอดรวม' : k === 'unpaid' ? 'ค้างจ่าย' : 'ชื่อ'}
               </button>
@@ -181,7 +178,7 @@ export function ReportView({
         )}
 
         {visiblePeople.length === 0 ? (
-          <div className="card py-8 text-center text-sm text-[#7d8595]">
+          <div className="card py-8 text-center text-sm text-[#6b7280]">
             {people.length === 0 ? 'ยังไม่มีรายการในเดือนนี้' : 'ไม่พบชื่อที่ค้นหา'}
           </div>
         ) : (
@@ -200,15 +197,15 @@ export function ReportView({
                   const pct = (p.total / maxTotal) * 100;
                   return (
                     <tr key={p.id} onClick={() => setSelected(p)}>
-                      <td className="font-semibold">{p.name}</td>
-                      <td className="num text-[#7d8595]">{p.count}</td>
+                      <td className="font-semibold text-[#111827]">{p.name}</td>
+                      <td className="num text-[#6b7280]">{p.count}</td>
                       <td
-                        className="num font-bold text-[#34d399]"
-                        style={{ background: `linear-gradient(to right, rgba(52,211,153,0.10) ${pct}%, transparent ${pct}%)` }}
+                        className="num font-bold text-[#111827]"
+                        style={{ background: `linear-gradient(to right, rgba(37,99,235,0.10) ${pct}%, transparent ${pct}%)` }}
                       >
                         ฿{p.total.toLocaleString()}
                       </td>
-                      <td className="num" style={{ color: p.unpaid > 0 ? '#fbbf24' : '#7d8595' }}>
+                      <td className="num" style={{ color: p.unpaid > 0 ? '#b45309' : '#94a3b8' }}>
                         {p.unpaid > 0 ? `฿${p.unpaid.toLocaleString()}` : '—'}
                       </td>
                     </tr>
@@ -223,7 +220,7 @@ export function ReportView({
       {/* By category */}
       {summary.byCategory.length > 0 && (
         <div className="flex flex-col gap-3">
-          <h2 className="text-sm font-semibold">ตามหมวด</h2>
+          <h2 className="text-sm font-semibold text-[#111827]">ตามหมวด</h2>
           <div className="table-card">
             <table className="tbl">
               <thead>
@@ -252,8 +249,8 @@ export function ReportView({
       {trend.some((t) => t.paid > 0) && (
         <div className="card flex flex-col gap-3">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-semibold">จ่ายจริง ต่อเดือน</h2>
-            <span className="text-[11px] text-[#7d8595]">
+            <h2 className="text-sm font-semibold text-[#111827]">จ่ายจริง ต่อเดือน</h2>
+            <span className="text-[11px] text-[#6b7280]">
               {trendSel != null ? `${monthLabel(trend[trendSel].period, true)}: ${baht(trend[trendSel].paid)}` : '6 เดือนล่าสุด'}
             </span>
           </div>
@@ -273,10 +270,10 @@ export function ReportView({
                     className="w-full rounded-t"
                     style={{
                       height: `${Math.max(3, (t.paid / maxPaid) * 70)}px`,
-                      background: active ? '#34d399' : '#1f3b30',
+                      background: active ? '#2563eb' : '#cbd7ea',
                     }}
                   />
-                  <div className="text-[9px] text-[#7d8595]">{THAI_MONTHS_SHORT[Number(t.period.split('-')[1]) - 1]}</div>
+                  <div className="text-[9px] text-[#6b7280]">{THAI_MONTHS_SHORT[Number(t.period.split('-')[1]) - 1]}</div>
                 </button>
               );
             })}
@@ -311,32 +308,32 @@ export function ReportView({
 function PersonDetail({ g }: { g: PersonGroup }) {
   return (
     <div className="flex flex-col gap-4">
-      <div className="rounded-xl border border-[#242833] bg-[#171a21] p-3">
-        <div className="text-[11px] text-[#7d8595]">ยอดรวมเดือนนี้ ({g.count} รายการ)</div>
-        <div className="text-xl font-bold text-[#f3f5f8]">{baht(g.total)}</div>
+      <div className="rounded-xl border border-[#e7eaef] bg-[#f8fafc] p-3">
+        <div className="text-[11px] text-[#6b7280]">ยอดรวมเดือนนี้ ({g.count} รายการ)</div>
+        <div className="text-xl font-bold text-[#111827]">{baht(g.total)}</div>
         <div className="mt-1 flex gap-4 text-[11px]">
-          <span className="text-[#34d399]">จ่ายแล้ว {baht(g.paid)}</span>
-          <span className="text-[#fbbf24]">รอจ่าย {baht(g.unpaid)}</span>
+          <span className="text-[#16a34a]">จ่ายแล้ว {baht(g.paid)}</span>
+          <span className="text-[#b45309]">รอจ่าย {baht(g.unpaid)}</span>
         </div>
       </div>
 
       <div className="flex flex-col gap-2">
         {g.claims.map((c) => (
-          <div key={c.id} className="flex items-center gap-3 rounded-xl border border-[#242833] bg-[#171a21] p-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#1b2b26] text-base">
+          <div key={c.id} className="flex items-center gap-3 rounded-xl border border-[#e7eaef] bg-[#f8fafc] p-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#eff6ff] text-base">
               {categoryEmoji(c.categoryName)}
             </div>
             <div className="min-w-0 flex-1">
-              <div className="truncate text-sm font-semibold">{c.categoryName ?? c.claimNo}</div>
-              <div className="text-[11px] text-[#7d8595]">
+              <div className="truncate text-sm font-semibold text-[#111827]">{c.categoryName ?? c.claimNo}</div>
+              <div className="text-[11px] text-[#6b7280]">
                 {c.status === 'paid' && c.paidDate ? `จ่าย ${shortThaiDate(c.paidDate)}` : c.claimNo}
               </div>
             </div>
             <div className="flex flex-col items-end gap-1">
-              <div className="text-sm font-bold">{baht(c.amount)}</div>
+              <div className="text-sm font-bold text-[#111827]">{baht(c.amount)}</div>
               <StatusBadge status={c.status} />
             </div>
-            <Link href={`/manage/claims/${c.id}`} className="text-xs font-semibold text-[#34d399]">
+            <Link href={`/manage/claims/${c.id}`} className="text-xs font-semibold text-[#2563eb]">
               ดู ›
             </Link>
           </div>

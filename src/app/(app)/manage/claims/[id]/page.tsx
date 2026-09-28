@@ -37,31 +37,31 @@ export default async function ClaimDetail({ params }: { params: Promise<{ id: st
       {/* Summary card */}
       <div className="card flex flex-col gap-3">
         <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#1b2b26] text-xl">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#eff6ff] text-xl">
             {categoryEmoji(categoryName)}
           </div>
           <div className="min-w-0 flex-1">
             <div className="text-sm font-bold">{c.claim_no}</div>
-            <div className="text-[11px] text-[#7d8595]">{categoryName ?? 'ไม่ระบุหมวด'}</div>
+            <div className="text-[11px] text-[#6b7280]">{categoryName ?? 'ไม่ระบุหมวด'}</div>
           </div>
           <StatusBadge status={status} />
         </div>
 
         <div className="grid grid-cols-2 gap-y-2 text-sm">
-          <div className="text-[#7d8595]">คน</div>
+          <div className="text-[#6b7280]">คน</div>
           <div className="text-right font-medium">
             {(c.submitter as { name: string }).name}
             {enteredByOther && (
-              <div className="text-[11px] font-normal text-[#7d8595]">
+              <div className="text-[11px] font-normal text-[#6b7280]">
                 กรอกโดย {(c.enterer as { name: string }).name}
               </div>
             )}
           </div>
-          <div className="text-[#7d8595]">เดือน</div>
+          <div className="text-[#6b7280]">เดือน</div>
           <div className="text-right font-medium">{c.period}</div>
-          <div className="text-[#7d8595]">ยอด</div>
-          <div className="text-right font-bold text-[#34d399]">฿{Number(c.amount_thb).toLocaleString()}</div>
-          <div className="text-[#7d8595]">จ่ายเมื่อ</div>
+          <div className="text-[#6b7280]">ยอด</div>
+          <div className="text-right font-bold text-[#2563eb]">฿{Number(c.amount_thb).toLocaleString()}</div>
+          <div className="text-[#6b7280]">จ่ายเมื่อ</div>
           <div className="text-right font-medium">{c.paid_date}</div>
         </div>
 
@@ -69,7 +69,7 @@ export default async function ClaimDetail({ params }: { params: Promise<{ id: st
           <a
             href={receiptUrl}
             target="_blank"
-            className="rounded-xl bg-[#10231b] py-2.5 text-center text-sm font-semibold text-[#34d399]"
+            className="rounded-xl bg-[#eff6ff] py-2.5 text-center text-sm font-semibold text-[#2563eb]"
           >
             📎 เปิดใบเสร็จ
           </a>

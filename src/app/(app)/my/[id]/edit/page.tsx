@@ -18,7 +18,7 @@ export default async function EditClaimPage({ params }: { params: Promise<{ id: 
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="mx-auto w-full max-w-[520px] rounded-2xl border border-[#3a2a1a] px-4 py-3 text-sm" style={{ background: '#2e1c10', color: '#fb923c' }}>
+      <div className="mx-auto w-full max-w-[520px] rounded-lg border border-[#fed7aa] px-4 py-3 text-sm" style={{ background: '#fff7ed', color: '#ea580c' }}>
         ↩ ตีกลับให้แก้: {claim.return_reason}
       </div>
       <NewClaimForm

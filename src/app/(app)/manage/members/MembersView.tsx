@@ -64,11 +64,11 @@ export function MembersView({ members, meId }: { members: Member[]; meId: string
   };
 
   return (
-    <div className="mx-auto flex w-full max-w-[560px] flex-col gap-4">
-      <h1 className="text-lg font-bold">จัดการสมาชิก ({members.length})</h1>
+    <div className="flex w-full flex-col gap-4">
+      <div className="text-[13px] text-[#6b7280]">ทั้งหมด {members.length} คน</div>
 
       {error && !pending && (
-        <div className="rounded-xl border border-[#3a2415] bg-[#2a1416] px-3 py-2 text-[12px] text-[#f87171]">
+        <div className="rounded-lg border border-[#fecaca] bg-[#fef2f2] px-3 py-2 text-[12px] text-[#dc2626]">
           {error}
         </div>
       )}
@@ -78,7 +78,7 @@ export function MembersView({ members, meId }: { members: Member[]; meId: string
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="ค้นชื่อ / อีเมล..."
-          className="field"
+          className="field max-w-[320px]"
         />
       )}
 
@@ -102,35 +102,35 @@ export function MembersView({ members, meId }: { members: Member[]; meId: string
                   <tr key={m.id}>
                     <td className="whitespace-nowrap">
                       <div className="flex items-center gap-2">
-                        <span className="font-semibold">{m.name}</span>
+                        <span className="font-semibold text-[#111827]">{m.name}</span>
                         {isSelf && (
-                          <span className="pill" style={{ background: '#10231b', color: '#34d399' }}>
+                          <span className="pill" style={{ background: '#eff6ff', color: '#2563eb' }}>
                             คุณ
                           </span>
                         )}
                       </div>
                     </td>
-                    <td className="whitespace-nowrap text-[#7d8595]">{m.email}</td>
+                    <td className="whitespace-nowrap text-[#6b7280]">{m.email}</td>
                     <td className="whitespace-nowrap">
                       <span
                         className="rounded-full border px-2 py-0.5 text-[10px] font-semibold"
                         style={
                           m.role === 'manager'
-                            ? { borderColor: '#1f3b30', background: '#10231b', color: '#34d399' }
-                            : { borderColor: '#242833', color: '#9aa3b2' }
+                            ? { borderColor: '#bfdbfe', background: '#dbeafe', color: '#2563eb' }
+                            : { borderColor: '#e7eaef', color: '#6b7280' }
                         }
                       >
                         {roleLabel(m.role)}
                       </span>
                     </td>
-                    <td className="whitespace-nowrap text-[11px]" style={{ color: m.active ? '#34d399' : '#7d8595' }}>
+                    <td className="whitespace-nowrap text-[11px]" style={{ color: m.active ? '#16a34a' : '#94a3b8' }}>
                       {m.active ? '● ใช้งาน' : '○ ปิดใช้งาน'}
                     </td>
                     {/* Telegram link status — placeholder (no column in schema yet, Phase 2) */}
-                    <td className="whitespace-nowrap text-[11px] text-[#7d8595]">📱 ยังไม่เชื่อม</td>
+                    <td className="whitespace-nowrap text-[11px] text-[#94a3b8]">📱 ยังไม่เชื่อม</td>
                     <td className="whitespace-nowrap">
                       <div className="flex items-center gap-2">
-                        <div className="flex overflow-hidden rounded-lg border border-[#242833] text-[11px]">
+                        <div className="flex overflow-hidden rounded-lg border border-[#e7eaef] text-[11px]">
                           {(['submitter', 'manager'] as Role[]).map((r) => {
                             const current = m.role === r;
                             return (
@@ -142,8 +142,8 @@ export function MembersView({ members, meId }: { members: Member[]; meId: string
                                 className="px-2.5 py-1.5 disabled:cursor-not-allowed"
                                 style={
                                   current
-                                    ? { background: '#34d399', color: '#08130e', fontWeight: 600 }
-                                    : { color: isSelf ? '#3a4150' : '#9aa3b2' }
+                                    ? { background: '#2563eb', color: '#fff', fontWeight: 600 }
+                                    : { color: isSelf ? '#cbd5e1' : '#6b7280' }
                                 }
                               >
                                 {roleLabel(r)}
@@ -158,8 +158,8 @@ export function MembersView({ members, meId }: { members: Member[]; meId: string
                           className="rounded-lg border px-3 py-1.5 text-[11px] font-semibold disabled:cursor-not-allowed disabled:opacity-50"
                           style={
                             m.active
-                              ? { borderColor: '#3a2415', background: '#1c130c', color: '#fb923c' }
-                              : { borderColor: '#1f3b30', background: '#10231b', color: '#34d399' }
+                              ? { borderColor: '#fecaca', background: '#fef2f2', color: '#dc2626' }
+                              : { borderColor: '#bbf7d0', background: '#f0fdf4', color: '#16a34a' }
                           }
                         >
                           {m.active ? 'ปิดการใช้งาน' : 'เปิดการใช้งาน'}
@@ -182,16 +182,16 @@ export function MembersView({ members, meId }: { members: Member[]; meId: string
       >
         {pending && (
           <div className="flex flex-col gap-4">
-            <p className="text-sm text-[#c9ced8]">
+            <p className="text-sm text-[#374151]">
               {pending.kind === 'role' ? (
-                <>เปลี่ยนสิทธิ์ของ <b className="text-[#f3f5f8]">{pending.member.name}</b> เป็น{' '}
-                  <b className="text-[#f3f5f8]">{roleLabel(pending.nextRole)}</b> ใช่ไหม?</>
+                <>เปลี่ยนสิทธิ์ของ <b className="text-[#111827]">{pending.member.name}</b> เป็น{' '}
+                  <b className="text-[#111827]">{roleLabel(pending.nextRole)}</b> ใช่ไหม?</>
               ) : (
-                <>ปิดการใช้งาน <b className="text-[#f3f5f8]">{pending.member.name}</b>? ผู้ใช้จะเข้าระบบไม่ได้จนกว่าจะเปิดใหม่</>
+                <>ปิดการใช้งาน <b className="text-[#111827]">{pending.member.name}</b>? ผู้ใช้จะเข้าระบบไม่ได้จนกว่าจะเปิดใหม่</>
               )}
             </p>
             {error && (
-              <div className="rounded-xl border border-[#3a2415] bg-[#2a1416] px-3 py-2 text-[12px] text-[#f87171]">
+              <div className="rounded-lg border border-[#fecaca] bg-[#fef2f2] px-3 py-2 text-[12px] text-[#dc2626]">
                 {error}
               </div>
             )}
@@ -200,7 +200,7 @@ export function MembersView({ members, meId }: { members: Member[]; meId: string
                 type="button"
                 onClick={() => { setPending(null); setError(null); }}
                 disabled={busy}
-                className="flex-1 rounded-xl border border-[#242833] py-3 text-sm font-semibold text-[#9aa3b2]"
+                className="btn-ghost flex-1"
               >
                 ยกเลิก
               </button>
@@ -208,12 +208,8 @@ export function MembersView({ members, meId }: { members: Member[]; meId: string
                 type="button"
                 onClick={confirmPending}
                 disabled={busy}
-                className="flex-1 rounded-xl py-3 text-sm font-semibold disabled:opacity-60"
-                style={
-                  pending.kind === 'deactivate'
-                    ? { background: '#dc2626', color: '#fff' }
-                    : { background: '#34d399', color: '#08130e' }
-                }
+                className="flex-1 rounded-lg py-2.5 text-sm font-semibold text-white disabled:opacity-60"
+                style={pending.kind === 'deactivate' ? { background: '#dc2626' } : { background: '#2563eb' }}
               >
                 {busy ? 'กำลังบันทึก...' : 'ยืนยัน'}
               </button>

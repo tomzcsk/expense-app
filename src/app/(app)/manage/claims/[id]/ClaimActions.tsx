@@ -35,7 +35,7 @@ export function ClaimActions({
           type="button"
           onClick={() => setOpen('approve')}
           className="w-full rounded-xl px-4 py-3 font-semibold"
-          style={{ background: '#34d399', color: '#08130e' }}
+          style={{ background: '#2563eb', color: '#fff' }}
         >
           ✓ อนุมัติ
         </button>
