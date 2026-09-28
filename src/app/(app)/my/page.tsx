@@ -37,18 +37,18 @@ export default async function MyClaimsPage() {
       {/* Summary strip */}
       <div className="card flex items-stretch justify-between text-center">
         <div className="flex-1">
-          <div className="text-[11px] text-[#94a3b8]">เดือนนี้</div>
-          <div className="font-bold text-[#6366f1]">{baht(monthTotal)}</div>
+          <div className="text-[11px] text-[#7d8595]">เดือนนี้</div>
+          <div className="font-bold text-[#34d399]">{baht(monthTotal)}</div>
         </div>
-        <div className="w-px bg-[#eef0f5]" />
+        <div className="w-px bg-[#242833]" />
         <div className="flex-1">
-          <div className="text-[11px] text-[#94a3b8]">รออนุมัติ</div>
-          <div className="font-bold text-[#f59e0b]">{pendingCount}</div>
+          <div className="text-[11px] text-[#7d8595]">รออนุมัติ</div>
+          <div className="font-bold text-[#fbbf24]">{pendingCount}</div>
         </div>
-        <div className="w-px bg-[#eef0f5]" />
+        <div className="w-px bg-[#242833]" />
         <div className="flex-1">
-          <div className="text-[11px] text-[#94a3b8]">จ่ายแล้ว</div>
-          <div className="font-bold text-[#10b981]">{paidCount}</div>
+          <div className="text-[11px] text-[#7d8595]">จ่ายแล้ว</div>
+          <div className="font-bold text-[#34d399]">{paidCount}</div>
         </div>
       </div>
 
@@ -59,7 +59,7 @@ export default async function MyClaimsPage() {
       {rows.length === 0 ? (
         <div className="card flex flex-col items-center gap-2 py-10 text-center">
           <div className="text-4xl">🧾</div>
-          <div className="text-sm text-[#94a3b8]">ยังไม่มีรายการ — กด ➕ ส่งเบิกใหม่ เพื่อเริ่ม</div>
+          <div className="text-sm text-[#7d8595]">ยังไม่มีรายการ — กด ➕ ส่งเบิกใหม่ เพื่อเริ่ม</div>
         </div>
       ) : (
         <div className="flex flex-col gap-2.5">
@@ -68,17 +68,17 @@ export default async function MyClaimsPage() {
             const returned = c.status === 'returned';
             const inner = (
               <>
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#eef2ff] text-lg">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#1b2b26] text-lg">
                   {categoryEmoji((c.category as unknown as { name: string } | null)?.name)}
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="truncate text-sm font-semibold">{name}</div>
                   {returned ? (
-                    <div className="text-[11px] text-[#ea580c]">
+                    <div className="text-[11px] text-[#fb923c]">
                       ↩ {c.return_reason} · แตะเพื่อแก้
                     </div>
                   ) : (
-                    <div className="text-[11px] text-[#94a3b8]">{shortThaiDate(c.paid_date)}</div>
+                    <div className="text-[11px] text-[#7d8595]">{shortThaiDate(c.paid_date)}</div>
                   )}
                 </div>
                 <div className="flex flex-col items-end gap-1">
@@ -92,7 +92,7 @@ export default async function MyClaimsPage() {
                 key={c.id}
                 href={`/my/${c.id}/edit`}
                 className="card flex items-center gap-3"
-                style={{ border: '1.5px solid #fed7aa' }}
+                style={{ border: '1.5px solid #3a2a1a' }}
               >
                 {inner}
               </Link>

@@ -16,7 +16,7 @@ export default async function EditClaimPage({ params }: { params: Promise<{ id: 
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="mx-auto w-full max-w-[520px] rounded-2xl px-4 py-3 text-sm" style={{ background: '#ffedd5', color: '#ea580c' }}>
+      <div className="mx-auto w-full max-w-[520px] rounded-2xl border border-[#3a2a1a] px-4 py-3 text-sm" style={{ background: '#2e1c10', color: '#fb923c' }}>
         ↩ ตีกลับให้แก้: {claim.return_reason}
       </div>
       <NewClaimForm categories={categories ?? []} action={resubmitClaim.bind(null, id)} />

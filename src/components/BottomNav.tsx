@@ -24,7 +24,7 @@ export function BottomNav({ role }: { role: 'submitter' | 'manager' }) {
   };
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-[#eef0f5] bg-white">
+    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-[#1c2029] bg-[#12151b]">
       <div
         className="mx-auto flex max-w-3xl items-stretch justify-around px-2 pt-2"
         style={{ paddingBottom: 'calc(0.6rem + env(safe-area-inset-bottom))' }}
@@ -36,7 +36,7 @@ export function BottomNav({ role }: { role: 'submitter' | 'manager' }) {
               key={t.href}
               href={t.href}
               className="flex flex-1 flex-col items-center gap-0.5 text-center"
-              style={{ color: active ? '#6366f1' : '#b6bdca' }}
+              style={{ color: active ? '#34d399' : '#7d8595' }}
             >
               <span className="text-xl leading-none">{t.icon}</span>
               <span className={`text-[10px] ${active ? 'font-semibold' : ''}`}>{t.label}</span>

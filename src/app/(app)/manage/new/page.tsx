@@ -12,7 +12,7 @@ export default async function ManagerNewClaimPage() {
   ]);
   return (
     <div className="flex flex-col gap-3">
-      <div className="mx-auto w-full max-w-[520px] rounded-2xl bg-[#eef2ff] px-4 py-3 text-xs text-[#4338ca]">
+      <div className="mx-auto w-full max-w-[520px] rounded-2xl border border-[#1f3b30] bg-[#10231b] px-4 py-3 text-xs text-[#34d399]">
         ✍️ กรอกเบิกแทนพนักงาน — ระบบบันทึกว่าคุณเป็นผู้กรอก
       </div>
       <NewClaimForm categories={categories ?? []} people={people ?? []} action={createClaimOnBehalf} />

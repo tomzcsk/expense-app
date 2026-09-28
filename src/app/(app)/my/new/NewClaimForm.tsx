@@ -38,7 +38,7 @@ export function NewClaimForm({
 
       {people && (
         <div>
-          <div className="mb-1.5 text-xs font-semibold text-[#475569]">เบิกให้ (พนักงาน)</div>
+          <div className="mb-1.5 text-xs font-semibold text-[#9aa1ab]">เบิกให้ (พนักงาน)</div>
           <select name="submitter_id" required className="field" defaultValue="">
             <option value="" disabled>— เลือกคน —</option>
             {people.map((p) => (
@@ -50,16 +50,16 @@ export function NewClaimForm({
 
       {/* 1. Receipt dropzone — keeps the upload-to-Storage logic + hidden receipt_path */}
       <div>
-        <div className="mb-1.5 text-xs font-semibold text-[#475569]">1. ใบเสร็จ</div>
+        <div className="mb-1.5 text-xs font-semibold text-[#9aa1ab]">1. ใบเสร็จ</div>
         <label
-          className="flex cursor-pointer flex-col items-center gap-1 rounded-2xl border-2 border-dashed bg-white px-4 py-6 text-center"
-          style={{ borderColor: receiptPath ? '#86efac' : '#c7d2fe' }}
+          className="flex cursor-pointer flex-col items-center gap-1 rounded-2xl border-2 border-dashed bg-[#171a21] px-4 py-6 text-center"
+          style={{ borderColor: receiptPath ? '#34d399' : '#2f3a44' }}
         >
           <div className="text-3xl">{uploading ? '⏳' : receiptPath ? '✅' : '📷'}</div>
-          <div className="text-sm font-semibold text-[#6366f1]">
+          <div className="text-sm font-semibold text-[#34d399]">
             {uploading ? 'กำลังอัปโหลด...' : receiptPath ? 'อัปโหลดแล้ว · แตะเพื่อเปลี่ยน' : 'ถ่ายรูป / เลือกใบเสร็จ'}
           </div>
-          <div className="text-[11px] text-[#94a3b8]">
+          <div className="text-[11px] text-[#7d8595]">
             {receiptName || 'รองรับรูป หรือ PDF'}
           </div>
           <input
@@ -74,7 +74,7 @@ export function NewClaimForm({
 
       {/* 2. Category chips — a styled radio group that submits `category_id` */}
       <div>
-        <div className="mb-1.5 text-xs font-semibold text-[#475569]">2. บริการอะไร</div>
+        <div className="mb-1.5 text-xs font-semibold text-[#9aa1ab]">2. บริการอะไร</div>
         <div className="flex flex-wrap gap-2">
           {categories.map((c) => {
             const selected = categoryId === c.id;
@@ -84,8 +84,8 @@ export function NewClaimForm({
                 className="pill cursor-pointer select-none px-3.5 py-2 text-xs"
                 style={
                   selected
-                    ? { background: '#6366f1', color: '#fff' }
-                    : { background: '#fff', color: '#475569', border: '1px solid #e5e7eb' }
+                    ? { background: '#34d399', color: '#08130e' }
+                    : { background: '#171a21', color: '#f3f5f8', border: '1px solid #242833' }
                 }
               >
                 <input
@@ -106,19 +106,19 @@ export function NewClaimForm({
 
       {/* 3. Amount */}
       <div>
-        <div className="mb-1.5 text-xs font-semibold text-[#475569]">3. ยอดที่จ่าย</div>
+        <div className="mb-1.5 text-xs font-semibold text-[#9aa1ab]">3. ยอดที่จ่าย</div>
         <div
-          className="flex items-center gap-2 rounded-2xl bg-white px-4 py-3"
-          style={{ border: '1.5px solid #6366f1' }}
+          className="flex items-center gap-2 rounded-2xl bg-[#171a21] px-4 py-3"
+          style={{ border: '1.5px solid #34d399' }}
         >
-          <span className="text-2xl font-bold text-[#6366f1]">฿</span>
+          <span className="text-2xl font-bold text-[#34d399]">฿</span>
           <input
             name="amount_thb"
             type="number"
             step="0.01"
             required
             placeholder="0.00"
-            className="w-full bg-transparent text-2xl font-bold outline-none"
+            className="w-full bg-transparent text-2xl font-bold text-[#f3f5f8] outline-none placeholder:text-[#7d8595]"
           />
         </div>
       </div>
@@ -126,18 +126,18 @@ export function NewClaimForm({
       {/* Month + paid date */}
       <div className="flex gap-3">
         <div className="flex-1">
-          <div className="mb-1.5 text-xs font-semibold text-[#475569]">เดือน</div>
+          <div className="mb-1.5 text-xs font-semibold text-[#9aa1ab]">เดือน</div>
           <input name="period" type="month" defaultValue={thisMonth} required className="field" />
         </div>
         <div className="flex-1">
-          <div className="mb-1.5 text-xs font-semibold text-[#475569]">วันที่จ่าย</div>
+          <div className="mb-1.5 text-xs font-semibold text-[#9aa1ab]">วันที่จ่าย</div>
           <input name="paid_date" type="date" required className="field" />
         </div>
       </div>
 
       {/* Optional note */}
       <div>
-        <div className="mb-1.5 text-xs font-semibold text-[#475569]">หมายเหตุ (ถ้ามี)</div>
+        <div className="mb-1.5 text-xs font-semibold text-[#9aa1ab]">หมายเหตุ (ถ้ามี)</div>
         <textarea name="note" rows={2} className="field" />
       </div>
 
@@ -146,7 +146,7 @@ export function NewClaimForm({
         <button disabled={uploading} className="btn-primary w-full">
           {uploading ? 'กำลังอัปโหลดใบเสร็จ...' : 'ส่งเบิก →'}
         </button>
-        <div className="mt-2 text-center text-[11px] text-[#94a3b8]">
+        <div className="mt-2 text-center text-[11px] text-[#7d8595]">
           VAT/ก่อน VAT บัญชีจะตรวจให้ ไม่ต้องคิดเอง
         </div>
       </div>

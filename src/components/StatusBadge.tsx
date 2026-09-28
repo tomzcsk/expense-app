@@ -1,11 +1,11 @@
 import { statusLabelTh, type ClaimStatus } from '@/lib/claims/status';
 
 const STYLE: Record<ClaimStatus, { bg: string; fg: string; icon: string }> = {
-  submitted: { bg: '#fef3c7', fg: '#d97706', icon: '⏳' },
-  approved: { bg: '#dbeafe', fg: '#2563eb', icon: '' },
-  returned: { bg: '#ffedd5', fg: '#ea580c', icon: '↩' },
-  rejected: { bg: '#fee2e2', fg: '#dc2626', icon: '✕' },
-  paid: { bg: '#dcfce7', fg: '#16a34a', icon: '✓' },
+  submitted: { bg: '#2a2410', fg: '#fbbf24', icon: '⏳' },
+  approved: { bg: '#10233a', fg: '#60a5fa', icon: '' },
+  returned: { bg: '#2e1c10', fg: '#fb923c', icon: '↩' },
+  rejected: { bg: '#2a1416', fg: '#f87171', icon: '✕' },
+  paid: { bg: '#10231b', fg: '#34d399', icon: '✓' },
 };
 
 export function StatusBadge({ status }: { status: ClaimStatus }) {

@@ -24,7 +24,7 @@ export default async function QueuePage() {
       {rows.length === 0 ? (
         <div className="card flex flex-col items-center gap-2 py-10 text-center">
           <div className="text-4xl">🎉</div>
-          <div className="text-sm text-[#94a3b8]">ไม่มีรายการรออนุมัติ — เคลียร์หมดแล้ว</div>
+          <div className="text-sm text-[#7d8595]">ไม่มีรายการรออนุมัติ — เคลียร์หมดแล้ว</div>
         </div>
       ) : (
         <div className="flex flex-col gap-2.5">
@@ -34,7 +34,7 @@ export default async function QueuePage() {
                 <div className="truncate text-sm font-semibold">
                   {(c.submitter as unknown as { name: string }).name}
                 </div>
-                <div className="text-[11px] text-[#94a3b8]">
+                <div className="text-[11px] text-[#7d8595]">
                   {c.claim_no} · {c.period}
                 </div>
               </div>
@@ -42,7 +42,7 @@ export default async function QueuePage() {
                 <div className="text-sm font-bold">{baht(c.amount_thb)}</div>
                 <StatusBadge status={c.status as ClaimStatus} />
               </div>
-              <div className="text-[#6366f1]">›</div>
+              <div className="text-[#34d399]">›</div>
             </Link>
           ))}
         </div>

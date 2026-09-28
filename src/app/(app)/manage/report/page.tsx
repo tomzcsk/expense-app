@@ -32,10 +32,10 @@ export default async function ReportPage({ searchParams }: { searchParams: Promi
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Tile label="รวมทั้งเดือน" value={baht(s.total)} sub={`${s.count} รายการ`} accent="#6366f1" tint="#eef2ff" />
-        <Tile label="จ่ายแล้ว" value={baht(s.paidTotal)} accent="#16a34a" tint="#dcfce7" />
-        <Tile label="อนุมัติแล้ว·รอจ่าย" value={baht(s.approvedUnpaidTotal)} accent="#2563eb" tint="#dbeafe" />
-        <Tile label="ยังไม่จบ" value={baht(s.total - s.paidTotal - s.approvedUnpaidTotal)} accent="#d97706" tint="#fef3c7" />
+        <Tile label="รวมทั้งเดือน" value={baht(s.total)} sub={`${s.count} รายการ`} accent="#34d399" tint="#10231b" />
+        <Tile label="จ่ายแล้ว" value={baht(s.paidTotal)} accent="#34d399" tint="#10231b" />
+        <Tile label="อนุมัติแล้ว·รอจ่าย" value={baht(s.approvedUnpaidTotal)} accent="#60a5fa" tint="#10233a" />
+        <Tile label="ยังไม่จบ" value={baht(s.total - s.paidTotal - s.approvedUnpaidTotal)} accent="#fbbf24" tint="#2a2410" />
       </div>
 
       <Section title="สรุปรายคน">
@@ -53,9 +53,9 @@ export default async function ReportPage({ searchParams }: { searchParams: Promi
 function Tile({ label, value, sub, accent, tint }: { label: string; value: string; sub?: string; accent: string; tint: string }) {
   return (
     <div className="card" style={{ background: tint }}>
-      <div className="text-xs text-[#64748b]">{label}</div>
+      <div className="text-xs text-[#9aa3b2]">{label}</div>
       <div className="text-lg font-bold" style={{ color: accent }}>{value}</div>
-      {sub && <div className="text-[11px] text-[#94a3b8]">{sub}</div>}
+      {sub && <div className="text-[11px] text-[#7d8595]">{sub}</div>}
     </div>
   );
 }
@@ -69,7 +69,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 }
 function Row({ left, right }: { left: string; right: string }) {
   return (
-    <div className="flex justify-between border-t border-[#eef0f5] py-2 text-sm first:border-t-0">
+    <div className="flex justify-between border-t border-[#242833] py-2 text-sm first:border-t-0">
       <span>{left}</span>
       <span className="font-medium">{right}</span>
     </div>

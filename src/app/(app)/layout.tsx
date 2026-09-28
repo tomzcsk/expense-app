@@ -15,20 +15,20 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="min-h-screen">
-      {/* Friendly gradient header */}
+      {/* Sleek dark header */}
       <header
-        className="px-4 pb-8 pt-5 text-white"
-        style={{ background: 'linear-gradient(135deg,#6366f1,#8b5cf6)' }}
+        className="border-b border-[#1c2029] px-4 pb-4 pt-5"
+        style={{ background: 'linear-gradient(180deg,#171a21,#0f1218)' }}
       >
         <div className="mx-auto flex max-w-3xl items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white/25 text-xl">
+          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#10231b] text-xl">
             🙂
           </div>
           <div className="min-w-0">
-            <div className="text-xs opacity-85">{greeting()} 👋</div>
-            <div className="flex items-center gap-2 text-base font-bold">
+            <div className="text-xs text-[#7d8595]">{greeting()} 👋</div>
+            <div className="flex items-center gap-2 text-base font-bold text-[#f3f5f8]">
               <span className="truncate">{me.name}</span>
-              <span className="rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-semibold">
+              <span className="rounded-full border border-[#1f3b30] bg-[#10231b] px-2 py-0.5 text-[10px] font-semibold text-[#34d399]">
                 {roleLabel}
               </span>
             </div>
@@ -39,8 +39,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         </div>
       </header>
 
-      {/* Content — pulled up over the header, with room for the fixed bottom nav */}
-      <main className="mx-auto -mt-4 max-w-3xl px-4 pb-28">{children}</main>
+      {/* Content, with room for the fixed bottom nav */}
+      <main className="mx-auto mt-4 max-w-3xl px-4 pb-28">{children}</main>
 
       <BottomNav role={me.role} />
     </div>
