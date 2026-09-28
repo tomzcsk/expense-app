@@ -1,13 +1,19 @@
 import { statusLabelTh, type ClaimStatus } from '@/lib/claims/status';
 
-const COLOR: Record<ClaimStatus, string> = {
-  submitted: 'bg-blue-100 text-blue-700',
-  approved: 'bg-yellow-100 text-yellow-700',
-  returned: 'bg-orange-100 text-orange-700',
-  rejected: 'bg-red-100 text-red-700',
-  paid: 'bg-green-100 text-green-700',
+const STYLE: Record<ClaimStatus, { bg: string; fg: string; icon: string }> = {
+  submitted: { bg: '#fef3c7', fg: '#d97706', icon: '⏳' },
+  approved: { bg: '#dbeafe', fg: '#2563eb', icon: '' },
+  returned: { bg: '#ffedd5', fg: '#ea580c', icon: '↩' },
+  rejected: { bg: '#fee2e2', fg: '#dc2626', icon: '✕' },
+  paid: { bg: '#dcfce7', fg: '#16a34a', icon: '✓' },
 };
 
 export function StatusBadge({ status }: { status: ClaimStatus }) {
-  return <span className={`rounded px-2 py-0.5 text-xs ${COLOR[status]}`}>{statusLabelTh(status)}</span>;
+  const s = STYLE[status];
+  return (
+    <span className="pill" style={{ backgroundColor: s.bg, color: s.fg }}>
+      {s.icon && <span aria-hidden>{s.icon}</span>}
+      {statusLabelTh(status)}
+    </span>
+  );
 }
