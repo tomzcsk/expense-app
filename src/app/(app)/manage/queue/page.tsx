@@ -1,12 +1,9 @@
-import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { requireManager } from '@/lib/current-user';
-import { StatusBadge } from '@/components/StatusBadge';
 import { OnBehalfButton } from './OnBehalfButton';
+import { QueueList, type QueueItem } from './QueueList';
 import { createClaimOnBehalf } from '../actions';
 import type { ClaimStatus } from '@/lib/claims/status';
-
-const baht = (n: number) => `฿${Number(n).toLocaleString()}`;
 
 export default async function QueuePage() {
   await requireManager();
@@ -14,14 +11,26 @@ export default async function QueuePage() {
   const [{ data: claims }, { data: categories }, { data: people }] = await Promise.all([
     supabase
       .from('expense_claims')
-      .select('id, claim_no, period, amount_thb, status, submitter:submitter_id(name)')
+      .select('id, claim_no, period, amount_thb, status, paid_date, created_by, submitter_id, submitter:submitter_id(name), enterer:created_by(name), category:category_id(name), receipt_path')
       .in('status', ['submitted', 'approved'])
       .order('created_at', { ascending: true }),
     supabase.from('categories').select('id, name').eq('active', true).order('name'),
     supabase.from('people').select('id, name').eq('active', true).order('name'),
   ]);
 
-  const rows = claims ?? [];
+  const items: QueueItem[] = (claims ?? []).map((c) => ({
+    id: c.id,
+    claimNo: c.claim_no,
+    period: c.period,
+    amount: Number(c.amount_thb),
+    status: c.status as ClaimStatus,
+    paidDate: c.paid_date as string | null,
+    submitterName: (c.submitter as unknown as { name: string }).name,
+    enteredByOther: c.created_by !== c.submitter_id,
+    entererName: (c.enterer as unknown as { name: string } | null)?.name ?? null,
+    categoryName: (c.category as unknown as { name: string } | null)?.name ?? null,
+    hasReceipt: !!c.receipt_path,
+  }));
 
   return (
     <div className="flex flex-col gap-4">
@@ -29,33 +38,7 @@ export default async function QueuePage() {
         <h1 className="text-lg font-bold">คิวรออนุมัติ</h1>
         <OnBehalfButton categories={categories ?? []} people={people ?? []} action={createClaimOnBehalf} />
       </div>
-
-      {rows.length === 0 ? (
-        <div className="card flex flex-col items-center gap-2 py-10 text-center">
-          <div className="text-4xl">🎉</div>
-          <div className="text-sm text-[#7d8595]">ไม่มีรายการรออนุมัติ — เคลียร์หมดแล้ว</div>
-        </div>
-      ) : (
-        <div className="flex flex-col gap-2.5">
-          {rows.map((c) => (
-            <Link key={c.id} href={`/manage/claims/${c.id}`} className="card flex items-center gap-3">
-              <div className="min-w-0 flex-1">
-                <div className="truncate text-sm font-semibold">
-                  {(c.submitter as unknown as { name: string }).name}
-                </div>
-                <div className="text-[11px] text-[#7d8595]">
-                  {c.claim_no} · {c.period}
-                </div>
-              </div>
-              <div className="flex flex-col items-end gap-1">
-                <div className="text-sm font-bold">{baht(c.amount_thb)}</div>
-                <StatusBadge status={c.status as ClaimStatus} />
-              </div>
-              <div className="text-[#34d399]">›</div>
-            </Link>
-          ))}
-        </div>
-      )}
+      <QueueList items={items} />
     </div>
   );
 }
