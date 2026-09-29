@@ -1,11 +1,18 @@
 'use client';
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { StatusBadge } from '@/components/StatusBadge';
 import { Modal } from '@/components/Modal';
 import { NewClaimForm } from './new/NewClaimForm';
 import { categoryEmoji } from '@/lib/category-emoji';
 import type { ClaimStatus } from '@/lib/claims/status';
+
+const THAI_MONTHS = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
+function monthLabel(period: string): string {
+  const [y, m] = period.split('-').map(Number);
+  return `${THAI_MONTHS[m - 1]} ${y}`;
+}
 
 export type MyClaimItem = {
   id: string;
@@ -30,6 +37,11 @@ function shortThaiDate(d?: string | null): string {
 }
 
 export function MyClaimsView({
+  period,
+  prevPeriod,
+  nextPeriod,
+  canGoNext,
+  latestPeriod,
   items,
   categories,
   monthTotal,
@@ -39,6 +51,11 @@ export function MyClaimsView({
   resubmitAction,
   deleteAction,
 }: {
+  period: string;
+  prevPeriod: string;
+  nextPeriod: string;
+  canGoNext: boolean;
+  latestPeriod: string;
   items: MyClaimItem[];
   categories: { id: string; name: string }[];
   monthTotal: number;
@@ -50,6 +67,7 @@ export function MyClaimsView({
 }) {
   const router = useRouter();
   const [submitOpen, setSubmitOpen] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
   const [editing, setEditing] = useState<MyClaimItem | null>(null);
   const [deleting, setDeleting] = useState<MyClaimItem | null>(null);
   const [delBusy, setDelBusy] = useState(false);
@@ -86,10 +104,37 @@ export function MyClaimsView({
 
   return (
     <div className="flex flex-col gap-5">
+      {/* Month navigator */}
+      <div className="flex items-center gap-1">
+        <Link
+          href={`/my?period=${prevPeriod}`}
+          aria-label="เดือนก่อนหน้า"
+          className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#e7eaef] bg-white text-lg text-[#111827]"
+        >
+          ‹
+        </Link>
+        <button type="button" onClick={() => setPickerOpen(true)} className="min-w-[150px] rounded-lg px-3 py-1.5 text-center text-base font-bold text-[#111827]">
+          {monthLabel(period)} ▾
+        </button>
+        {canGoNext ? (
+          <Link
+            href={`/my?period=${nextPeriod}`}
+            aria-label="เดือนถัดไป"
+            className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#e7eaef] bg-white text-lg text-[#111827]"
+          >
+            ›
+          </Link>
+        ) : (
+          <span aria-disabled className="flex h-9 w-9 cursor-not-allowed items-center justify-center rounded-lg border border-[#e7eaef] bg-white text-lg text-[#cbd5e1]">
+            ›
+          </span>
+        )}
+      </div>
+
       {/* Summary strip */}
       <div className="grid grid-cols-3 gap-3">
         <div className="card">
-          <div className="text-xs text-[#6b7280]">เดือนนี้</div>
+          <div className="text-xs text-[#6b7280]">ยอดรวม</div>
           <div className="mt-1 text-xl font-bold text-[#111827]">{baht(monthTotal)}</div>
         </div>
         <div className="card">
@@ -111,7 +156,7 @@ export function MyClaimsView({
 
       {items.length === 0 ? (
         <div className="card py-12 text-center text-sm text-[#6b7280]">
-          ยังไม่มีรายการ — กด ＋ ส่งเบิกใหม่ เพื่อเริ่ม
+          เดือน{monthLabel(period)} ยังไม่มีรายการ — กด ＋ ส่งเบิกใหม่ เพื่อเริ่ม
         </div>
       ) : (
         <div className="table-card">
@@ -195,6 +240,22 @@ export function MyClaimsView({
             />
           </>
         )}
+      </Modal>
+
+      {/* Month picker */}
+      <Modal open={pickerOpen} onClose={() => setPickerOpen(false)} title="เลือกเดือน">
+        <input
+          type="month"
+          defaultValue={period}
+          max={latestPeriod}
+          className="field"
+          onChange={(e) => {
+            if (e.target.value) {
+              setPickerOpen(false);
+              router.push(`/my?period=${e.target.value}`);
+            }
+          }}
+        />
       </Modal>
 
       {/* Delete confirm */}
