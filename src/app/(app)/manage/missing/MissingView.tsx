@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Modal } from '@/components/Modal';
 import { categoryEmoji } from '@/lib/category-emoji';
 import type { MissingRow } from '@/lib/subscriptions/missing';
-import { addSubscription, updateSubscription, setSubscriptionActive, deleteSubscription } from './actions';
+import { addSubscription, updateSubscription, setSubscriptionActive, deleteSubscription, sendRemindersNow } from './actions';
 
 export type SubRow = {
   id: string;
@@ -69,6 +69,16 @@ export function MissingView({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState('');
+  const [reminding, setReminding] = useState(false);
+  const [remindMsg, setRemindMsg] = useState<string | null>(null);
+
+  const fireReminders = async () => {
+    setReminding(true);
+    setRemindMsg(null);
+    const r = await sendRemindersNow();
+    setReminding(false);
+    setRemindMsg(r.error ?? `ส่งเตือน ${r.sent} คน · ข้าม ${r.skippedNoTelegram} คน (ยังไม่เชื่อม Telegram)`);
+  };
 
   const visibleSubs = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -188,11 +198,17 @@ export function MissingView({
             </div>
           ) : (
             <>
-              <div className="text-sm font-semibold" style={{ color: missingCount > 0 ? '#dc2626' : '#16a34a' }}>
-                {missingCount > 0
-                  ? `⚠️ ตกเบิก ${missingCount} รายการ · ${missingPeople} คน`
-                  : '✅ ส่งครบทุกรายการแล้ว'}
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="text-sm font-semibold" style={{ color: missingCount > 0 ? '#dc2626' : '#16a34a' }}>
+                  {missingCount > 0
+                    ? `⚠️ ตกเบิก ${missingCount} รายการ · ${missingPeople} คน`
+                    : '✅ ส่งครบทุกรายการแล้ว'}
+                </div>
+                <button type="button" onClick={fireReminders} disabled={reminding} className="btn-ghost text-sm">
+                  {reminding ? 'กำลังส่ง...' : '🔔 ยิงเตือน Telegram'}
+                </button>
               </div>
+              {remindMsg && <div className="text-[12px] text-[#6b7280]">{remindMsg}</div>}
               <div className="table-card">
                 <div className="tbl-scroll">
                   <table className="tbl">

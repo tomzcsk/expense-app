@@ -2,6 +2,18 @@
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
 import { requireManager } from '@/lib/current-user';
+import { sendMissingReminders, type ReminderResult } from '@/lib/reminders';
+
+// Manager fires the ตกเบิก reminder DMs for the current month on demand.
+export async function sendRemindersNow(): Promise<ReminderResult & { error?: string }> {
+  await requireManager();
+  try {
+    return await sendMissingReminders();
+  } catch (e) {
+    console.error('sendRemindersNow failed', e);
+    return { sent: 0, skippedNoTelegram: 0, missingPeople: 0, error: 'ยิงเตือนไม่สำเร็จ ลองใหม่อีกครั้ง' };
+  }
+}
 
 // Recurring-subscription writes. Session client → RLS (recsub_write USING
 // is_manager()) enforces manager-only; requireManager() is the fast guard.

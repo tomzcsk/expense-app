@@ -1,12 +1,11 @@
 import Link from 'next/link';
 import { getCurrentUser } from '@/lib/current-user';
 import { LogoutButton } from '@/components/LogoutButton';
+import { TelegramLink } from './TelegramLink';
 
 export default async function ProfilePage() {
   const me = await getCurrentUser();
   const roleLabel = me.role === 'manager' ? 'คนจัดการ' : 'พนักงาน';
-  // Placeholder: telegram_chat_id is not in the schema yet (Phase 2). No bot flow.
-  const telegramChatId: string | null = null;
 
   return (
     <div className="mx-auto flex w-full max-w-[520px] flex-col gap-4">
@@ -24,24 +23,10 @@ export default async function ProfilePage() {
         </div>
       </div>
 
-      {/* Telegram (placeholder) */}
+      {/* Telegram */}
       <div className="card flex flex-col gap-2">
         <div className="text-sm font-semibold text-[#111827]">การแจ้งเตือน Telegram</div>
-        {telegramChatId ? (
-          <div className="text-sm font-semibold text-[#16a34a]">เชื่อมแล้ว ✓</div>
-        ) : (
-          <>
-            <div className="text-[12px] text-[#6b7280]">ยังไม่เชื่อม Telegram</div>
-            <button
-              type="button"
-              disabled
-              className="w-full cursor-not-allowed rounded-lg border border-[#e7eaef] bg-[#f8fafc] py-2.5 text-sm font-semibold text-[#94a3b8]"
-            >
-              เชื่อม Telegram
-            </button>
-            <div className="text-[11px] text-[#94a3b8]">จะเปิดใช้งานหลัง deploy (Phase 2)</div>
-          </>
-        )}
+        <TelegramLink linked={!!me.telegram_chat_id} username={me.telegram_username} />
       </div>
 
       {/* Manager-only: members management */}
