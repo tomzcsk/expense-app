@@ -13,6 +13,7 @@ const TITLES: Record<string, string> = {
   '/manage/queue': 'คิวรอจ่าย',
   '/manage/new': 'กรอกแทน',
   '/manage/report': 'รายงาน',
+  '/manage/missing': 'กันตกเบิก',
   '/manage/members': 'สมาชิก',
   '/profile': 'โปรไฟล์',
 };
@@ -46,6 +47,7 @@ export function AppShell({
           { href: '/manage/queue', icon: '💸', label: 'คิวรอจ่าย', badge: submittedCount },
           { href: '/manage/new', icon: '✍️', label: 'กรอกแทน' },
           { href: '/manage/report', icon: '📊', label: 'รายงาน' },
+          { href: '/manage/missing', icon: '⚠️', label: 'กันตกเบิก' },
           { href: '/manage/members', icon: '👥', label: 'สมาชิก' },
         ] as NavItem[])
       : []),

@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { getCurrentUser } from '@/lib/current-user';
 import { createClient } from '@/lib/supabase/server';
 import { summarize, type ClaimRow } from '@/lib/reports/aggregate';
+import { computeMissing, type Subscription } from '@/lib/subscriptions/missing';
 import { QueueList, type QueueItem } from '../manage/queue/QueueList';
 import type { ClaimStatus } from '@/lib/claims/status';
 
@@ -15,13 +16,17 @@ export default async function DashboardPage() {
   const period = new Date().toISOString().slice(0, 7);
   const supabase = await createClient();
 
-  const [{ data: claims }, { count: memberCount }] = await Promise.all([
+  const [{ data: claims }, { count: memberCount }, { data: subsRaw }] = await Promise.all([
     supabase
       .from('expense_claims')
-      .select('id, claim_no, period, amount_thb, status, paid_date, created_by, submitter_id, submitter:submitter_id(name), enterer:created_by(name), category:category_id(name), receipt_path')
+      .select('id, claim_no, period, amount_thb, status, paid_date, created_by, submitter_id, category_id, submitter:submitter_id(name), enterer:created_by(name), category:category_id(name), receipt_path')
       .eq('period', period)
       .order('created_at', { ascending: true }),
     supabase.from('people').select('id', { count: 'exact', head: true }).eq('active', true),
+    supabase
+      .from('recurring_subscriptions')
+      .select('id, person_id, category_id, expected_amount, person:person_id(name), category:category_id(name)')
+      .eq('active', true),
   ]);
 
   const all = claims ?? [];
@@ -34,6 +39,21 @@ export default async function DashboardPage() {
   const s = summarize(rows);
   const paidCount = all.filter((c) => c.status === 'paid').length;
   const submitters = new Set(all.map((c) => c.submitter_id as string)).size;
+
+  // ตกเบิก for the current month (read-only compute; empty until migration 0007 is applied).
+  const activeSubs: Subscription[] = (subsRaw ?? []).map((s) => ({
+    id: s.id as string,
+    personId: s.person_id as string,
+    personName: (s.person as unknown as { name: string } | null)?.name ?? '-',
+    categoryId: (s.category_id as string | null) ?? null,
+    categoryName: (s.category as unknown as { name: string } | null)?.name ?? null,
+    expectedAmount: s.expected_amount != null ? Number(s.expected_amount) : null,
+  }));
+  const claimKeys = all
+    .filter((c) => c.status !== 'rejected')
+    .map((c) => ({ personId: c.submitter_id as string, categoryId: (c.category_id as string | null) ?? null }));
+  const { missingCount, missingPeople } = computeMissing(activeSubs, claimKeys);
+  const hasActiveSubs = activeSubs.length > 0;
 
   const submittedItems: QueueItem[] = all
     .filter((c) => c.status === 'submitted')
@@ -76,6 +96,36 @@ export default async function DashboardPage() {
           <div className="mt-0.5 text-[11px] text-[#94a3b8]">ส่งเบิกแล้ว {submitters}</div>
         </div>
       </div>
+
+      {/* ตกเบิก alert */}
+      {missingCount > 0 ? (
+        <Link
+          href="/manage/missing"
+          className="flex items-center justify-between gap-3 rounded-xl px-4 py-3"
+          style={{ border: '2px solid #fecaca', background: '#fef2f2' }}
+        >
+          <div className="text-sm font-semibold text-[#dc2626]">
+            ⚠️ ตกเบิกเดือนนี้ : {missingCount} รายการ · {missingPeople} คน
+          </div>
+          <span className="text-sm font-semibold text-[#dc2626]">ดู ›</span>
+        </Link>
+      ) : hasActiveSubs ? (
+        <Link
+          href="/manage/missing"
+          className="flex items-center justify-between gap-3 rounded-xl border border-[#bbf7d0] bg-[#f0fdf4] px-4 py-3"
+        >
+          <div className="text-sm font-semibold text-[#16a34a]">✅ กันตกเบิก : ส่งครบทุกรายการแล้ว</div>
+          <span className="text-xs font-semibold text-[#16a34a]">ดู ›</span>
+        </Link>
+      ) : (
+        <Link
+          href="/manage/missing"
+          className="flex items-center justify-between gap-3 rounded-xl border border-[#e7eaef] bg-white px-4 py-3"
+        >
+          <div className="text-sm text-[#6b7280]">🔔 ตั้งค่ากันตกเบิก — ติดตาม subscription ประจำที่ยังไม่ส่ง</div>
+          <span className="text-xs font-semibold text-[#2563eb]">ตั้งค่า ›</span>
+        </Link>
+      )}
 
       {/* Queue preview */}
       <div className="flex flex-col gap-3">
