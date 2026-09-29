@@ -36,5 +36,8 @@ export async function proxy(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)'],
+  // Exclude /api routes: they authenticate themselves (the Telegram webhook via a
+  // secret header, the cron route via a bearer token). Redirecting them to /login
+  // would break Telegram delivery + scheduled reminders.
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)'],
 };
