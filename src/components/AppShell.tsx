@@ -39,6 +39,39 @@ export function AppShell({
   const pathname = usePathname();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
+  // Submitters have a single destination (their claims), so the full admin
+  // sidebar is overkill. Give them a clean, mobile-friendly top-bar layout;
+  // managers keep the sidebar below.
+  if (role === 'submitter') {
+    return (
+      <div className="min-h-screen bg-[#f8fafc]">
+        <header className="sticky top-0 z-20 border-b border-[#e7eaef] bg-white">
+          <div className="mx-auto flex h-14 max-w-[760px] items-center justify-between gap-3 px-4 sm:px-6">
+            <Link href="/my" className="flex items-center gap-2.5">
+              <div className="flex h-[30px] w-[30px] items-center justify-center rounded-lg bg-[#2563eb] font-bold text-white">฿</div>
+              <div className="font-bold text-[#111827]">ระบบเบิกจ่าย</div>
+            </Link>
+            <div className="flex items-center gap-1.5 sm:gap-2.5">
+              <Link
+                href="/profile"
+                className="flex items-center gap-2 rounded-full py-1 pl-1 pr-1 transition hover:bg-[#f3f4f6] sm:pr-2.5"
+                title="โปรไฟล์ · เชื่อม Telegram"
+              >
+                <div className="flex h-[30px] w-[30px] items-center justify-center rounded-full bg-[#eef2ff] text-[#4f46e5]">🙂</div>
+                <div className="hidden min-w-0 leading-tight sm:block">
+                  <div className="truncate text-[12.5px] font-semibold text-[#111827]">{name}</div>
+                  <div className="text-[10.5px] text-[#6b7280]">{roleLabel}</div>
+                </div>
+              </Link>
+              <LogoutButton />
+            </div>
+          </div>
+        </header>
+        <main className="mx-auto max-w-[760px] px-4 py-5 sm:px-6">{children}</main>
+      </div>
+    );
+  }
+
   const nav: NavItem[] = [
     { href: '/dashboard', icon: '▦', label: 'ภาพรวม' },
     { href: '/my', icon: '🧾', label: 'เบิกของฉัน' },
