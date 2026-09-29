@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { StatusBadge } from '@/components/StatusBadge';
 import { Modal } from '@/components/Modal';
 import { NewClaimForm } from './new/NewClaimForm';
@@ -36,6 +37,7 @@ export function MyClaimsView({
   paidCount,
   createAction,
   resubmitAction,
+  deleteAction,
 }: {
   items: MyClaimItem[];
   categories: { id: string; name: string }[];
@@ -44,9 +46,31 @@ export function MyClaimsView({
   paidCount: number;
   createAction: (formData: FormData) => void;
   resubmitAction: (claimId: string, formData: FormData) => void;
+  deleteAction: (claimId: string) => Promise<{ error?: string }>;
 }) {
+  const router = useRouter();
   const [submitOpen, setSubmitOpen] = useState(false);
   const [editing, setEditing] = useState<MyClaimItem | null>(null);
+  const [deleting, setDeleting] = useState<MyClaimItem | null>(null);
+  const [delBusy, setDelBusy] = useState(false);
+  const [delError, setDelError] = useState<string | null>(null);
+
+  // A claim can be removed by its owner until it is paid.
+  const canDelete = (s: ClaimStatus) => s === 'submitted' || s === 'returned' || s === 'rejected';
+
+  const confirmDelete = async () => {
+    if (!deleting) return;
+    setDelBusy(true);
+    setDelError(null);
+    const res = await deleteAction(deleting.id);
+    setDelBusy(false);
+    if (res?.error) {
+      setDelError(res.error);
+      return;
+    }
+    setDeleting(null);
+    router.refresh();
+  };
 
   // Close the submit dialog once a new row shows up after the server round-trip.
   useEffect(() => {
@@ -117,15 +141,26 @@ export function MyClaimsView({
                     <StatusBadge status={i.status} />
                   </td>
                   <td className="whitespace-nowrap" style={{ textAlign: 'right' }}>
-                    {i.status === 'returned' && (
-                      <button
-                        type="button"
-                        onClick={() => setEditing(i)}
-                        className="text-xs font-semibold text-[#2563eb]"
-                      >
-                        แก้ไข
-                      </button>
-                    )}
+                    <div className="flex items-center justify-end gap-3">
+                      {i.status === 'returned' && (
+                        <button
+                          type="button"
+                          onClick={() => setEditing(i)}
+                          className="text-xs font-semibold text-[#2563eb]"
+                        >
+                          แก้ไข
+                        </button>
+                      )}
+                      {canDelete(i.status) && (
+                        <button
+                          type="button"
+                          onClick={() => { setDelError(null); setDeleting(i); }}
+                          className="text-xs font-semibold text-[#dc2626]"
+                        >
+                          ลบ
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -159,6 +194,28 @@ export function MyClaimsView({
               }}
             />
           </>
+        )}
+      </Modal>
+
+      {/* Delete confirm */}
+      <Modal open={!!deleting} onClose={() => { if (!delBusy) setDeleting(null); }} title="ลบรายการเบิก">
+        {deleting && (
+          <div className="flex flex-col gap-4">
+            <p className="text-sm text-[#374151]">
+              ลบรายการ <b className="text-[#111827]">{deleting.categoryName ?? deleting.claimNo}</b> · {baht(deleting.amount)} ใช่ไหม? ลบแล้วกู้คืนไม่ได้
+            </p>
+            {delError && (
+              <div className="rounded-lg border border-[#fecaca] bg-[#fef2f2] px-3 py-2 text-[12px] text-[#dc2626]">{delError}</div>
+            )}
+            <div className="flex gap-2">
+              <button type="button" onClick={() => setDeleting(null)} disabled={delBusy} className="btn-ghost flex-1 text-sm">
+                ยกเลิก
+              </button>
+              <button type="button" onClick={confirmDelete} disabled={delBusy} className="flex-1 rounded-lg px-4 py-2 text-sm font-semibold text-white disabled:opacity-60" style={{ background: '#dc2626' }}>
+                {delBusy ? 'กำลังลบ...' : 'ลบรายการ'}
+              </button>
+            </div>
+          </div>
         )}
       </Modal>
     </div>

@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { getCurrentUser } from '@/lib/current-user';
-import { createClaim, resubmitClaim } from './actions';
+import { createClaim, resubmitClaim, deleteClaim } from './actions';
 import { MyClaimsView, type MyClaimItem } from './MyClaimsView';
 import type { ClaimStatus } from '@/lib/claims/status';
 import { currentPeriodBangkok } from '@/lib/bangkok-time';
@@ -44,6 +44,7 @@ export default async function MyClaimsPage() {
       paidCount={paidCount}
       createAction={createClaim}
       resubmitAction={resubmitClaim}
+      deleteAction={deleteClaim}
     />
   );
 }
