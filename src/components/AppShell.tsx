@@ -3,6 +3,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { LogoutButton } from '@/components/LogoutButton';
+import { enterSubmitterView, exitSubmitterView } from '@/app/view-actions';
 
 type Role = 'submitter' | 'manager';
 type NavItem = { href: string; icon: string; label: string; badge?: number };
@@ -28,12 +29,14 @@ export function AppShell({
   name,
   roleLabel,
   submittedCount,
+  viewingAsSubmitter = false,
   children,
 }: {
   role: Role;
   name: string;
   roleLabel: string;
   submittedCount: number;
+  viewingAsSubmitter?: boolean;
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
@@ -67,6 +70,16 @@ export function AppShell({
             </div>
           </div>
         </header>
+        {viewingAsSubmitter && (
+          <div className="border-b border-[#fde68a] bg-[#fffbeb]">
+            <div className="mx-auto flex max-w-[760px] items-center justify-between gap-3 px-4 py-2 text-[12.5px] text-[#92400e] sm:px-6">
+              <span>🔄 กำลังดูเป็น <b>คนเบิก</b> (โหมดทดสอบ)</span>
+              <form action={exitSubmitterView}>
+                <button type="submit" className="shrink-0 font-semibold text-[#b45309] underline">กลับเป็นแอดมิน</button>
+              </form>
+            </div>
+          </div>
+        )}
         <main className="mx-auto max-w-[760px] px-4 py-5 sm:px-6">{children}</main>
       </div>
     );
@@ -127,19 +140,31 @@ export function AppShell({
           );
         })}
       </nav>
-      <div className="mt-auto flex items-center gap-2.5 border-t border-[#1f2937] pt-3">
-        <Link
-          href="/profile"
-          onClick={() => setDrawerOpen(false)}
-          className="flex min-w-0 flex-1 items-center gap-2.5"
-        >
-          <div className="flex h-[30px] w-[30px] items-center justify-center rounded-full bg-[#374151] text-white">🙂</div>
-          <div className="min-w-0">
-            <div className="truncate text-[12.5px] font-semibold text-[#e5e7eb]">{name}</div>
-            <div className="text-[10.5px] text-[#6b7280]">{roleLabel}</div>
-          </div>
-        </Link>
-        <LogoutButton variant="icon" />
+      <div className="mt-auto">
+        {/* Admin test aid: flip the whole app into the submitter view. */}
+        <form action={enterSubmitterView}>
+          <button
+            type="submit"
+            className="mb-1 flex w-full items-center gap-3 rounded-lg px-3.5 py-2 text-[12.5px] text-[#9aa3b2] transition hover:bg-[#1a2130]"
+          >
+            <span className="w-[18px] text-center text-[15px]">🔄</span>
+            <span>ทดสอบมุมมองคนเบิก</span>
+          </button>
+        </form>
+        <div className="flex items-center gap-2.5 border-t border-[#1f2937] pt-3">
+          <Link
+            href="/profile"
+            onClick={() => setDrawerOpen(false)}
+            className="flex min-w-0 flex-1 items-center gap-2.5"
+          >
+            <div className="flex h-[30px] w-[30px] items-center justify-center rounded-full bg-[#374151] text-white">🙂</div>
+            <div className="min-w-0">
+              <div className="truncate text-[12.5px] font-semibold text-[#e5e7eb]">{name}</div>
+              <div className="text-[10.5px] text-[#6b7280]">{roleLabel}</div>
+            </div>
+          </Link>
+          <LogoutButton variant="icon" />
+        </div>
       </div>
     </div>
   );

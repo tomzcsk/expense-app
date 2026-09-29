@@ -18,7 +18,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   }
 
   return (
-    <AppShell role={me.role} name={me.name} roleLabel={roleLabel} submittedCount={submittedCount}>
+    <AppShell role={me.role} name={me.name} roleLabel={roleLabel} submittedCount={submittedCount} viewingAsSubmitter={me.viewingAsSubmitter}>
       {children}
     </AppShell>
   );
