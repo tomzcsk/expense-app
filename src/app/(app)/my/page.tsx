@@ -59,6 +59,7 @@ export default async function MyClaimsPage({ searchParams }: { searchParams: Pro
 
   return (
     <MyClaimsView
+      name={me.name}
       period={period}
       prevPeriod={addMonth(period, -1)}
       nextPeriod={addMonth(period, 1)}

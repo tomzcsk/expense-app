@@ -37,6 +37,7 @@ function shortThaiDate(d?: string | null): string {
 }
 
 export function MyClaimsView({
+  name,
   period,
   prevPeriod,
   nextPeriod,
@@ -51,6 +52,7 @@ export function MyClaimsView({
   resubmitAction,
   deleteAction,
 }: {
+  name: string;
   period: string;
   prevPeriod: string;
   nextPeriod: string;
@@ -104,6 +106,12 @@ export function MyClaimsView({
 
   return (
     <div className="flex flex-col gap-5">
+      {/* Greeting */}
+      <div>
+        <h1 className="text-lg font-bold text-[#111827]">สวัสดี, {name.split(' ')[0]} 👋</h1>
+        <p className="text-sm text-[#6b7280]">ส่งบิลค่าบริการที่จ่ายไป แล้วติดตามสถานะได้ที่นี่</p>
+      </div>
+
       {/* Month navigator */}
       <div className="flex items-center gap-1">
         <Link
@@ -131,19 +139,25 @@ export function MyClaimsView({
         )}
       </div>
 
-      {/* Summary strip */}
-      <div className="grid grid-cols-3 gap-3">
-        <div className="card">
-          <div className="text-xs text-[#6b7280]">ยอดรวม</div>
-          <div className="mt-1 text-xl font-bold text-[#111827]">{baht(monthTotal)}</div>
+      {/* Hero summary — focal point */}
+      <div className="overflow-hidden rounded-2xl border border-[#e7eaef] bg-white">
+        <div className="bg-gradient-to-br from-[#2563eb] to-[#1d4ed8] px-5 py-5 text-white">
+          <div className="text-[13px] font-medium text-white/80">ยอดเบิกเดือนนี้</div>
+          <div className="mt-1 text-3xl font-extrabold tracking-tight">{baht(monthTotal)}</div>
         </div>
-        <div className="card">
-          <div className="text-xs text-[#6b7280]">รอจ่าย</div>
-          <div className="mt-1 text-xl font-bold text-[#b45309]">{pendingCount}</div>
-        </div>
-        <div className="card">
-          <div className="text-xs text-[#6b7280]">จ่ายแล้ว</div>
-          <div className="mt-1 text-xl font-bold text-[#16a34a]">{paidCount}</div>
+        <div className="grid grid-cols-3 divide-x divide-[#eef1f5]">
+          <div className="px-4 py-3 text-center">
+            <div className="text-[11px] text-[#6b7280]">รายการ</div>
+            <div className="mt-0.5 text-lg font-bold text-[#111827]">{items.length}</div>
+          </div>
+          <div className="px-4 py-3 text-center">
+            <div className="text-[11px] text-[#6b7280]">รอจ่าย</div>
+            <div className="mt-0.5 text-lg font-bold text-[#b45309]">{pendingCount}</div>
+          </div>
+          <div className="px-4 py-3 text-center">
+            <div className="text-[11px] text-[#6b7280]">จ่ายแล้ว</div>
+            <div className="mt-0.5 text-lg font-bold text-[#16a34a]">{paidCount}</div>
+          </div>
         </div>
       </div>
 
