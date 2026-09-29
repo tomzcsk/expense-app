@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { requireManager } from '@/lib/current-user';
 import { summarize, type ClaimRow } from '@/lib/reports/aggregate';
 import type { ClaimStatus } from '@/lib/claims/status';
-import { ReportView, type PersonGroup } from './ReportView';
+import { ReportView, type PersonGroup, type ClaimLine } from './ReportView';
 
 // Add/subtract whole months on a "YYYY-MM" string.
 function addMonth(period: string, delta: number): string {
@@ -66,6 +66,19 @@ export default async function ReportPage({ searchParams }: { searchParams: Promi
   }
   const people = [...personMap.values()].sort((a, b) => b.total - a.total);
 
+  // Flat itemized list (every bill) for the claim table, sorted by pay date.
+  const items: ClaimLine[] = claims
+    .map((r) => ({
+      id: r.id as string,
+      claimNo: r.claim_no as string,
+      paidDate: r.paid_date as string | null,
+      submitterName: (r.submitter as unknown as { name: string }).name,
+      categoryName: (r.category as unknown as { name: string } | null)?.name ?? null,
+      amount: Number(r.amount_thb),
+      status: r.status as ClaimStatus,
+    }))
+    .sort((a, b) => (a.paidDate ?? '').localeCompare(b.paidDate ?? '') || a.claimNo.localeCompare(b.claimNo));
+
   const latestPeriod = latestRow?.period ?? thisMonth;
   const nextPeriod = addMonth(period, 1);
   const canGoNext = nextPeriod <= latestPeriod;
@@ -86,6 +99,7 @@ export default async function ReportPage({ searchParams }: { searchParams: Promi
       latestPeriod={latestPeriod}
       summary={summary}
       people={people}
+      items={items}
       trend={trend}
     />
   );

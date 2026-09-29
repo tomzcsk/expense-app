@@ -188,3 +188,39 @@ body {
 .tbl-tap.tbl-sticky tbody tr:focus-within td:first-child {
   background: #f9fafb;
 }
+
+/* Print statement (company reimbursement claim) */
+.avoid-break {
+  break-inside: avoid;
+}
+.print-tbl {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.print-tbl th {
+  text-align: left;
+  font-weight: 600;
+  color: #374151;
+  border-bottom: 1px solid #9ca3af;
+  padding: 6px 8px;
+}
+.print-tbl td {
+  padding: 6px 8px;
+  border-bottom: 1px solid #e5e7eb;
+  color: #111827;
+  vertical-align: top;
+}
+.print-tbl th.num,
+.print-tbl td.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: #ffffff !important;
+  }
+}

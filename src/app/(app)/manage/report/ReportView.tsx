@@ -25,6 +25,15 @@ export type PersonGroup = {
   unpaid: number;
   claims: PersonClaim[];
 };
+export type ClaimLine = {
+  id: string;
+  claimNo: string;
+  paidDate: string | null;
+  submitterName: string;
+  categoryName: string | null;
+  amount: number;
+  status: ClaimStatus;
+};
 
 const THAI_MONTHS = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
 const THAI_MONTHS_SHORT = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
@@ -83,6 +92,7 @@ export function ReportView({
   latestPeriod,
   summary,
   people,
+  items,
   trend,
 }: {
   period: string;
@@ -92,6 +102,7 @@ export function ReportView({
   latestPeriod: string;
   summary: MonthlySummary;
   people: PersonGroup[];
+  items: ClaimLine[];
   trend: { period: string; paid: number }[];
 }) {
   const router = useRouter();
@@ -148,14 +159,27 @@ export function ReportView({
             </span>
           )}
         </div>
-        <a href={`/manage/report/export?period=${period}`} className="btn-primary px-3 text-sm">
-          ⬇ Export CSV
-        </a>
       </div>
 
-      {/* KPI row */}
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <Kpi icon="📊" label="ยอดเบิกรวม" value={baht(summary.total)} sub={`${summary.count} รายการ`} valueColor="#111827" />
+      {/* Grand total — the amount claimed from the company */}
+      <div className="card flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <div className="text-xs text-[#6b7280]">ยอดที่ต้องเบิกกับบริษัท · {monthLabel(period)}</div>
+          <div className="text-[34px] font-extrabold leading-tight text-[#111827]">{baht(summary.total)}</div>
+          <div className="text-[12px] text-[#6b7280]">{summary.count} รายการ (ทุกสถานะ ยกเว้นปฏิเสธ)</div>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <a href={`/manage/report/print?period=${period}`} target="_blank" rel="noopener" className="btn-primary text-sm">
+            🖨️ พิมพ์ / PDF ใบเบิกบริษัท
+          </a>
+          <a href={`/manage/report/export?period=${period}`} className="btn-ghost text-sm">
+            ⬇ Excel/CSV
+          </a>
+        </div>
+      </div>
+
+      {/* Supporting KPIs */}
+      <div className="grid grid-cols-3 gap-3">
         <Kpi icon="⏳" label="รอจ่าย (ต้องจ่าย)" value={baht(summary.unpaidTotal)} sub={`${summary.unpaidCount} รายการ`} valueColor="#b45309" emphasis />
         <Kpi icon="✓" label="จ่ายแล้ว" value={baht(summary.paidTotal)} sub="เดือนนี้" valueColor="#16a34a" />
         <Kpi icon="👥" label="ผู้เบิก" value={`${people.length} คน`} sub={`${summary.count} รายการ`} valueColor="#111827" />
@@ -232,6 +256,59 @@ export function ReportView({
             </div>
           )}
         </div>
+      </div>
+
+      {/* Every bill — the substance of the claim */}
+      <div className="flex flex-col gap-3">
+        <h2 className="text-sm font-semibold text-[#111827]">รายการทั้งหมด (ทุกบิล)</h2>
+        {items.length === 0 ? (
+          <div className="card py-8 text-center text-sm text-[#6b7280]">ยังไม่มีรายการในเดือนนี้</div>
+        ) : (
+          <div className="table-card">
+            <div className="tbl-scroll">
+              <table className="tbl">
+                <thead>
+                  <tr>
+                    <th scope="col">เลขที่</th>
+                    <th scope="col">วันที่</th>
+                    <th scope="col">ชื่อ</th>
+                    <th scope="col">บริการ</th>
+                    <th scope="col" className="num">ยอด</th>
+                    <th scope="col">สถานะ</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {items.map((it) => (
+                    <tr key={it.id}>
+                      <td className="whitespace-nowrap font-medium text-[#111827]">{it.claimNo}</td>
+                      <td className="whitespace-nowrap text-[#6b7280]">{shortThaiDate(it.paidDate)}</td>
+                      <td className="whitespace-nowrap">{it.submitterName}</td>
+                      <td className="whitespace-nowrap">
+                        <span className="mr-1.5">{categoryEmoji(it.categoryName)}</span>
+                        {it.categoryName ?? '-'}
+                      </td>
+                      <td className="num font-semibold">{baht(it.amount)}</td>
+                      <td>
+                        <StatusBadge status={it.status} />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <td colSpan={4} className="text-right font-semibold text-[#6b7280]" style={{ borderTop: '2px solid #e7eaef' }}>
+                      รวมที่ต้องเบิก (ไม่รวมปฏิเสธ)
+                    </td>
+                    <td className="num font-bold text-[#111827]" style={{ borderTop: '2px solid #e7eaef' }}>
+                      {baht(summary.total)}
+                    </td>
+                    <td style={{ borderTop: '2px solid #e7eaef' }} />
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Month picker */}
