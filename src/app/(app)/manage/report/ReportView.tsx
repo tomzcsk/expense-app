@@ -110,6 +110,7 @@ export function ReportView({
   const [selected, setSelected] = useState<PersonGroup | null>(null);
   const [sort, setSort] = useState<SortKey>('total');
   const [query, setQuery] = useState('');
+  const [tab, setTab] = useState<'summary' | 'people' | 'items'>('summary');
 
   const maxTotal = Math.max(1, ...people.map((p) => p.total));
 
@@ -178,26 +179,53 @@ export function ReportView({
         </div>
       </div>
 
-      {/* Supporting KPIs */}
-      <div className="grid grid-cols-3 gap-3">
-        <Kpi icon="⏳" label="รอจ่าย (ต้องจ่าย)" value={baht(summary.unpaidTotal)} sub={`${summary.unpaidCount} รายการ`} valueColor="#b45309" emphasis />
-        <Kpi icon="✓" label="จ่ายแล้ว" value={baht(summary.paidTotal)} sub="เดือนนี้" valueColor="#16a34a" />
-        <Kpi icon="👥" label="ผู้เบิก" value={`${people.length} คน`} sub={`${summary.count} รายการ`} valueColor="#111827" />
+      {/* Tabs */}
+      <div role="tablist" aria-label="มุมมองรายงาน" className="flex gap-6 border-b border-[#e7eaef]">
+        {([
+          { key: 'summary', label: 'สรุป' },
+          { key: 'people', label: `รายคน (${people.length})` },
+          { key: 'items', label: `รายการทั้งหมด (${items.length})` },
+        ] as const).map((t) => {
+          const on = tab === t.key;
+          return (
+            <button
+              key={t.key}
+              type="button"
+              role="tab"
+              aria-selected={on}
+              onClick={() => setTab(t.key)}
+              className="relative -mb-px border-b-2 px-1 py-2.5 text-sm font-semibold transition"
+              style={on ? { borderColor: BLUE, color: BLUE } : { borderColor: 'transparent', color: '#6b7280' }}
+            >
+              {t.label}
+            </button>
+          );
+        })}
       </div>
-      {summary.returnedCount > 0 && (
-        <div className="-mt-1 text-[11px] text-[#ea580c]">↩ ตีกลับ {summary.returnedCount} รายการเดือนนี้</div>
+
+      {/* Tab: สรุป — KPIs + charts */}
+      {tab === 'summary' && (
+        <div className="flex flex-col gap-5">
+          <div className="grid grid-cols-3 gap-3">
+            <Kpi icon="⏳" label="รอจ่าย (ต้องจ่าย)" value={baht(summary.unpaidTotal)} sub={`${summary.unpaidCount} รายการ`} valueColor="#b45309" emphasis />
+            <Kpi icon="✓" label="จ่ายแล้ว" value={baht(summary.paidTotal)} sub="เดือนนี้" valueColor="#16a34a" />
+            <Kpi icon="👥" label="ผู้เบิก" value={`${people.length} คน`} sub={`${summary.count} รายการ`} valueColor="#111827" />
+          </div>
+          {summary.returnedCount > 0 && (
+            <div className="-mt-2 text-[11px] text-[#ea580c]">↩ ตีกลับ {summary.returnedCount} รายการเดือนนี้</div>
+          )}
+          <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+            <TrendCard trend={trend} />
+            <CategoryCard data={summary.byCategory} />
+          </div>
+        </div>
       )}
 
-      {/* Charts (left) + per-person (right) */}
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
-        <div className="flex flex-col gap-5">
-          <TrendCard trend={trend} />
-          <CategoryCard data={summary.byCategory} />
-        </div>
-
+      {/* Tab: รายคน — per-person table + drill-down */}
+      {tab === 'people' && (
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between gap-2">
-            <h2 className="text-sm font-semibold text-[#111827]">รายคน ({people.length})</h2>
+            <span className="text-sm text-[#6b7280]">เรียงตาม</span>
             <div className="flex overflow-hidden rounded-lg border border-[#e7eaef] text-[11px]">
               {(['total', 'unpaid', 'name'] as SortKey[]).map((k) => (
                 <button
@@ -256,60 +284,61 @@ export function ReportView({
             </div>
           )}
         </div>
-      </div>
+      )}
 
-      {/* Every bill — the substance of the claim */}
-      <div className="flex flex-col gap-3">
-        <h2 className="text-sm font-semibold text-[#111827]">รายการทั้งหมด (ทุกบิล)</h2>
-        {items.length === 0 ? (
-          <div className="card py-8 text-center text-sm text-[#6b7280]">ยังไม่มีรายการในเดือนนี้</div>
-        ) : (
-          <div className="table-card">
-            <div className="tbl-scroll">
-              <table className="tbl">
-                <thead>
-                  <tr>
-                    <th scope="col">เลขที่</th>
-                    <th scope="col">วันที่</th>
-                    <th scope="col">ชื่อ</th>
-                    <th scope="col">บริการ</th>
-                    <th scope="col" className="num">ยอด</th>
-                    <th scope="col">สถานะ</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {items.map((it) => (
-                    <tr key={it.id}>
-                      <td className="whitespace-nowrap font-medium text-[#111827]">{it.claimNo}</td>
-                      <td className="whitespace-nowrap text-[#6b7280]">{shortThaiDate(it.paidDate)}</td>
-                      <td className="whitespace-nowrap">{it.submitterName}</td>
-                      <td className="whitespace-nowrap">
-                        <span className="mr-1.5">{categoryEmoji(it.categoryName)}</span>
-                        {it.categoryName ?? '-'}
-                      </td>
-                      <td className="num font-semibold">{baht(it.amount)}</td>
-                      <td>
-                        <StatusBadge status={it.status} />
-                      </td>
+      {/* Tab: รายการทั้งหมด — every bill */}
+      {tab === 'items' && (
+        <div className="flex flex-col gap-3">
+          {items.length === 0 ? (
+            <div className="card py-8 text-center text-sm text-[#6b7280]">ยังไม่มีรายการในเดือนนี้</div>
+          ) : (
+            <div className="table-card">
+              <div className="tbl-scroll">
+                <table className="tbl">
+                  <thead>
+                    <tr>
+                      <th scope="col">เลขที่</th>
+                      <th scope="col">วันที่</th>
+                      <th scope="col">ชื่อ</th>
+                      <th scope="col">บริการ</th>
+                      <th scope="col" className="num">ยอด</th>
+                      <th scope="col">สถานะ</th>
                     </tr>
-                  ))}
-                </tbody>
-                <tfoot>
-                  <tr>
-                    <td colSpan={4} className="text-right font-semibold text-[#6b7280]" style={{ borderTop: '2px solid #e7eaef' }}>
-                      รวมที่ต้องเบิก (ไม่รวมปฏิเสธ)
-                    </td>
-                    <td className="num font-bold text-[#111827]" style={{ borderTop: '2px solid #e7eaef' }}>
-                      {baht(summary.total)}
-                    </td>
-                    <td style={{ borderTop: '2px solid #e7eaef' }} />
-                  </tr>
-                </tfoot>
-              </table>
+                  </thead>
+                  <tbody>
+                    {items.map((it) => (
+                      <tr key={it.id}>
+                        <td className="whitespace-nowrap font-medium text-[#111827]">{it.claimNo}</td>
+                        <td className="whitespace-nowrap text-[#6b7280]">{shortThaiDate(it.paidDate)}</td>
+                        <td className="whitespace-nowrap">{it.submitterName}</td>
+                        <td className="whitespace-nowrap">
+                          <span className="mr-1.5">{categoryEmoji(it.categoryName)}</span>
+                          {it.categoryName ?? '-'}
+                        </td>
+                        <td className="num font-semibold">{baht(it.amount)}</td>
+                        <td>
+                          <StatusBadge status={it.status} />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                  <tfoot>
+                    <tr>
+                      <td colSpan={4} className="text-right font-semibold text-[#6b7280]" style={{ borderTop: '2px solid #e7eaef' }}>
+                        รวมที่ต้องเบิก (ไม่รวมปฏิเสธ)
+                      </td>
+                      <td className="num font-bold text-[#111827]" style={{ borderTop: '2px solid #e7eaef' }}>
+                        {baht(summary.total)}
+                      </td>
+                      <td style={{ borderTop: '2px solid #e7eaef' }} />
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
             </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      )}
 
       {/* Month picker */}
       <Modal open={pickerOpen} onClose={() => setPickerOpen(false)} title="เลือกเดือน">
