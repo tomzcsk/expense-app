@@ -126,15 +126,6 @@ export function AppShell({
             </Link>
           );
         })}
-        {/* Admin-only: peek at what employees (คนเบิก) see. */}
-        <Link
-          href="/preview"
-          onClick={() => setDrawerOpen(false)}
-          className="mt-1 flex items-center gap-3 rounded-lg border-t border-[#1f2937] px-3.5 pb-2.5 pt-3 text-[13.5px] text-[#9aa3b2] transition hover:bg-[#1a2130]"
-        >
-          <span className="w-[18px] text-center text-[15px]">👁</span>
-          <span>ดูมุมมองคนเบิก</span>
-        </Link>
       </nav>
       <div className="mt-auto flex items-center gap-2.5 border-t border-[#1f2937] pt-3">
         <Link
