@@ -4,6 +4,7 @@ import { getCurrentUser } from '@/lib/current-user';
 import { createClient } from '@/lib/supabase/server';
 import { summarize, type ClaimRow } from '@/lib/reports/aggregate';
 import { computeMissing, type Subscription } from '@/lib/subscriptions/missing';
+import { currentPeriodBangkok } from '@/lib/bangkok-time';
 import { QueueList, type QueueItem } from '../manage/queue/QueueList';
 import type { ClaimStatus } from '@/lib/claims/status';
 
@@ -13,7 +14,7 @@ export default async function DashboardPage() {
   const me = await getCurrentUser();
   if (me.role !== 'manager') redirect('/my'); // submitters don't get the manager overview
 
-  const period = new Date().toISOString().slice(0, 7);
+  const period = currentPeriodBangkok();
   const supabase = await createClient();
 
   const [{ data: claims }, { count: memberCount }, { data: subsRaw }] = await Promise.all([

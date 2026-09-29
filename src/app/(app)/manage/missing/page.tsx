@@ -1,6 +1,7 @@
 import { requireManager } from '@/lib/current-user';
 import { createClient } from '@/lib/supabase/server';
 import { computeMissing, type Subscription } from '@/lib/subscriptions/missing';
+import { currentPeriodBangkok } from '@/lib/bangkok-time';
 import { MissingView, type SubRow } from './MissingView';
 
 function addMonth(period: string, delta: number): string {
@@ -11,7 +12,7 @@ function addMonth(period: string, delta: number): string {
 
 export default async function MissingPage({ searchParams }: { searchParams: Promise<{ period?: string }> }) {
   await requireManager();
-  const thisMonth = new Date().toISOString().slice(0, 7);
+  const thisMonth = currentPeriodBangkok();
   const { period = thisMonth } = await searchParams;
   const supabase = await createClient();
 

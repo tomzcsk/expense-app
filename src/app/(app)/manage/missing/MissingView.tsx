@@ -77,7 +77,11 @@ export function MissingView({
     setRemindMsg(null);
     const r = await sendRemindersNow();
     setReminding(false);
-    setRemindMsg(r.error ?? `ส่งเตือน ${r.sent} คน · ข้าม ${r.skippedNoTelegram} คน (ยังไม่เชื่อม Telegram)`);
+    setRemindMsg(
+      r.error ??
+        `ส่งเตือน ${r.sent} คน · ข้าม ${r.skippedNoTelegram} คน (ยังไม่เชื่อม Telegram)` +
+          (r.skippedAlreadySent ? ` · เตือนไปแล้ววันนี้ ${r.skippedAlreadySent} คน` : ''),
+    );
   };
 
   const visibleSubs = useMemo(() => {

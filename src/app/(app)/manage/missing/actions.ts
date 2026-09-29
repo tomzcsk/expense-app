@@ -11,7 +11,7 @@ export async function sendRemindersNow(): Promise<ReminderResult & { error?: str
     return await sendMissingReminders();
   } catch (e) {
     console.error('sendRemindersNow failed', e);
-    return { sent: 0, skippedNoTelegram: 0, missingPeople: 0, error: 'ยิงเตือนไม่สำเร็จ ลองใหม่อีกครั้ง' };
+    return { sent: 0, skippedNoTelegram: 0, skippedAlreadySent: 0, missingPeople: 0, error: 'ยิงเตือนไม่สำเร็จ ลองใหม่อีกครั้ง' };
   }
 }
 

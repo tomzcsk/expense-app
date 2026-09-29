@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { createClient } from '@/lib/supabase/browser';
 import { categoryEmoji } from '@/lib/category-emoji';
+import { currentPeriodBangkok } from '@/lib/bangkok-time';
 
 export type ClaimDefaults = {
   period?: string;
@@ -27,22 +28,29 @@ export function NewClaimForm({
   const [receiptPath, setReceiptPath] = useState('');
   const [receiptName, setReceiptName] = useState('');
   const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const [categoryId, setCategoryId] = useState(defaults?.category_id ?? '');
 
   const upload = async (file: File) => {
     setUploading(true);
+    setUploadError(null);
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
     const path = `${user!.id}/${Date.now()}-${file.name}`;
     const { error } = await supabase.storage.from('receipts').upload(path, file);
-    if (!error) {
+    if (error) {
+      // Storage now enforces MIME + 10MB (migration 0009) — surface a rejection
+      // instead of silently leaving the field empty.
+      console.error('receipt upload failed', error);
+      setUploadError('อัปโหลดไม่สำเร็จ — รองรับเฉพาะรูปภาพหรือ PDF ขนาดไม่เกิน 10MB · ลองใหม่อีกครั้ง');
+    } else {
       setReceiptPath(path);
       setReceiptName(file.name);
     }
     setUploading(false);
   };
 
-  const thisMonth = new Date().toISOString().slice(0, 7);
+  const thisMonth = currentPeriodBangkok();
   const editing = !!defaults;
 
   return (
@@ -80,11 +88,12 @@ export function NewClaimForm({
           </div>
           <input
             type="file"
-            accept="image/*,application/pdf"
+            accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif,application/pdf"
             className="sr-only"
             onChange={(e) => e.target.files?.[0] && upload(e.target.files[0])}
           />
         </label>
+        {uploadError && <div className="mt-1.5 text-[12px] font-medium text-[#dc2626]">{uploadError}</div>}
         <input type="hidden" name="receipt_path" value={receiptPath} />
       </div>
 

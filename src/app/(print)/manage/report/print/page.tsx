@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { summarize, type ClaimRow } from '@/lib/reports/aggregate';
 import { statusLabelTh, type ClaimStatus } from '@/lib/claims/status';
 import { categoryEmoji } from '@/lib/category-emoji';
+import { currentPeriodBangkok, currentDateBangkok } from '@/lib/bangkok-time';
 import { PrintButton } from './PrintButton';
 
 const THAI_MONTHS = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
@@ -23,7 +24,7 @@ export default async function ReportPrintPage({ searchParams }: { searchParams: 
   const me = await getCurrentUser();
   if (me.role !== 'manager') redirect('/my');
 
-  const thisMonth = new Date().toISOString().slice(0, 7);
+  const thisMonth = currentPeriodBangkok();
   const { period = thisMonth } = await searchParams;
   const supabase = await createClient();
 
@@ -66,7 +67,7 @@ export default async function ReportPrintPage({ searchParams }: { searchParams: 
     .map((it, i) => ({ ...it, url: signed[i], isPdf: !!it.receiptPath && it.receiptPath.toLowerCase().endsWith('.pdf') }))
     .filter((it) => it.status !== 'rejected'); // the claimed bills
 
-  const printedOn = dayLabel(new Date().toISOString().slice(0, 10));
+  const printedOn = dayLabel(currentDateBangkok());
 
   return (
     <div className="min-h-screen bg-white text-[#111827]">

@@ -1,6 +1,7 @@
 import { createAdminClient } from '@/lib/supabase/admin';
 import { computeMissing, type Subscription } from '@/lib/subscriptions/missing';
 import { sendTelegramMessage } from '@/lib/telegram';
+import { currentPeriodBangkok, currentDateBangkok } from '@/lib/bangkok-time';
 
 const THAI_MONTHS = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
 
@@ -17,13 +18,21 @@ export function buildReminderMessage(month: string, services: string[], siteUrl:
   return `⏰ เตือนส่งเบิกเดือน ${month}\nยังไม่ได้ส่ง: ${services.join(', ')}\nส่งที่ 👉 ${siteUrl}`;
 }
 
-export type ReminderResult = { sent: number; skippedNoTelegram: number; missingPeople: number };
+export type ReminderResult = {
+  sent: number;
+  skippedNoTelegram: number;
+  skippedAlreadySent: number;
+  missingPeople: number;
+};
 
 // Compute the CURRENT month's ตกเบิก and DM each missing person who has linked
 // Telegram. Uses the service-role client (trusted server job, no session).
+// Idempotent per person per day: reminder_log claims a (person, Bangkok-date)
+// slot before each DM, so cron retries / repeated button clicks don't re-send.
 export async function sendMissingReminders(): Promise<ReminderResult> {
   const admin = createAdminClient();
-  const period = new Date().toISOString().slice(0, 7);
+  const period = currentPeriodBangkok();
+  const today = currentDateBangkok();
 
   const [{ data: subsRaw }, { data: claimsRaw }] = await Promise.all([
     admin
@@ -68,15 +77,38 @@ export async function sendMissingReminders(): Promise<ReminderResult> {
   const label = monthLabel(period);
   let sent = 0;
   let skippedNoTelegram = 0;
+  let skippedAlreadySent = 0;
   for (const [personId, services] of byPerson) {
     const chatId = chatIdByPerson.get(personId);
     if (!chatId) {
       skippedNoTelegram++;
       continue;
     }
+    // Claim today's slot BEFORE sending. A unique-violation (23505) means this
+    // person was already nudged today (cron retry / double click) → skip.
+    const { error: logErr } = await admin
+      .from('reminder_log')
+      .insert({ person_id: personId, sent_date: today, period });
+    if (logErr) {
+      if (logErr.code === '23505') skippedAlreadySent++;
+      else console.error('reminder_log insert failed', logErr);
+      continue; // don't DM if we couldn't record it
+    }
     const res = await sendTelegramMessage(chatId, buildReminderMessage(label, services, site));
-    if (res.ok) sent++;
+    if (res.ok) {
+      sent++;
+    } else {
+      // Send failed — release the slot so a later run can retry today. Reminders
+      // favor at-least-once (a missed ตกเบิก nudge is worse than a rare repeat),
+      // and day 25 vs 28 give a second natural attempt. Log if cleanup itself fails.
+      const { error: delErr } = await admin
+        .from('reminder_log')
+        .delete()
+        .eq('person_id', personId)
+        .eq('sent_date', today);
+      if (delErr) console.error('reminder_log cleanup failed', personId, today, delErr);
+    }
   }
 
-  return { sent, skippedNoTelegram, missingPeople: byPerson.size };
+  return { sent, skippedNoTelegram, skippedAlreadySent, missingPeople: byPerson.size };
 }

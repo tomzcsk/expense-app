@@ -3,10 +3,11 @@ import { createClient } from '@/lib/supabase/server';
 import { requireManager } from '@/lib/current-user';
 import { toCsv } from '@/lib/reports/csv';
 import { statusLabelTh, type ClaimStatus } from '@/lib/claims/status';
+import { currentPeriodBangkok } from '@/lib/bangkok-time';
 
 export async function GET(req: NextRequest) {
   await requireManager();
-  const period = req.nextUrl.searchParams.get('period') ?? new Date().toISOString().slice(0, 7);
+  const period = req.nextUrl.searchParams.get('period') ?? currentPeriodBangkok();
   const supabase = await createClient();
 
   const { data } = await supabase

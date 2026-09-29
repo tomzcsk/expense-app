@@ -24,6 +24,13 @@ export async function sendTelegramMessage(
       console.error('sendTelegramMessage failed', res.status, await res.text().catch(() => ''));
       return { ok: false };
     }
+    // Telegram can return HTTP 200 with a JSON body of {"ok": false, ...}; trust
+    // that field, not just the transport status, before reporting success.
+    const body = (await res.json().catch(() => null)) as { ok?: boolean } | null;
+    if (!body?.ok) {
+      console.error('sendTelegramMessage: non-ok body', body);
+      return { ok: false };
+    }
     return { ok: true };
   } catch (e) {
     console.error('sendTelegramMessage error', e);

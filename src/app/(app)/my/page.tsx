@@ -3,6 +3,7 @@ import { getCurrentUser } from '@/lib/current-user';
 import { createClaim, resubmitClaim } from './actions';
 import { MyClaimsView, type MyClaimItem } from './MyClaimsView';
 import type { ClaimStatus } from '@/lib/claims/status';
+import { currentPeriodBangkok } from '@/lib/bangkok-time';
 
 export default async function MyClaimsPage() {
   const me = await getCurrentUser();
@@ -29,7 +30,7 @@ export default async function MyClaimsPage() {
     categoryName: (c.category as unknown as { name: string } | null)?.name ?? null,
   }));
 
-  const thisMonth = new Date().toISOString().slice(0, 7);
+  const thisMonth = currentPeriodBangkok();
   const monthTotal = items.filter((i) => i.period === thisMonth).reduce((sum, i) => sum + i.amount, 0);
   const pendingCount = items.filter((i) => i.status === 'submitted').length;
   const paidCount = items.filter((i) => i.status === 'paid').length;

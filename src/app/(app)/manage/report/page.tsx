@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { requireManager } from '@/lib/current-user';
 import { summarize, type ClaimRow } from '@/lib/reports/aggregate';
 import type { ClaimStatus } from '@/lib/claims/status';
+import { currentPeriodBangkok } from '@/lib/bangkok-time';
 import { ReportView, type PersonGroup, type ClaimLine } from './ReportView';
 
 // Add/subtract whole months on a "YYYY-MM" string.
@@ -13,7 +14,7 @@ function addMonth(period: string, delta: number): string {
 
 export default async function ReportPage({ searchParams }: { searchParams: Promise<{ period?: string }> }) {
   await requireManager();
-  const thisMonth = new Date().toISOString().slice(0, 7);
+  const thisMonth = currentPeriodBangkok();
   const { period = thisMonth } = await searchParams;
   const supabase = await createClient();
 
