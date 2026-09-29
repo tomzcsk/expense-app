@@ -10,6 +10,8 @@ export type Member = {
   email: string;
   role: Role;
   active: boolean;
+  telegramChatId: number | null;
+  telegramUsername: string | null;
 };
 
 type Pending =
@@ -126,8 +128,15 @@ export function MembersView({ members, meId }: { members: Member[]; meId: string
                     <td className="whitespace-nowrap text-[11px]" style={{ color: m.active ? '#16a34a' : '#94a3b8' }}>
                       {m.active ? '● ใช้งาน' : '○ ปิดใช้งาน'}
                     </td>
-                    {/* Telegram link status — placeholder (no column in schema yet, Phase 2) */}
-                    <td className="whitespace-nowrap text-[11px] text-[#94a3b8]">📱 ยังไม่เชื่อม</td>
+                    <td className="whitespace-nowrap text-[11px]">
+                      {m.telegramChatId ? (
+                        <span className="font-semibold text-[#16a34a]">
+                          ✓ {m.telegramUsername ? `@${m.telegramUsername}` : 'เชื่อมแล้ว'}
+                        </span>
+                      ) : (
+                        <span className="text-[#94a3b8]">ยังไม่เชื่อม</span>
+                      )}
+                    </td>
                     <td className="whitespace-nowrap">
                       <div className="flex items-center gap-2">
                         <div className="flex overflow-hidden rounded-lg border border-[#e7eaef] text-[11px]">
